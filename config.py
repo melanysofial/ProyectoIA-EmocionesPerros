@@ -9,7 +9,9 @@ Modifica solo los valores que necesites personalizar.
 
 # === CONFIGURACIÓN DE TELEGRAM ===
 # Token del bot oficial - ¡NO CAMBIAR ESTE VALOR!
-TELEGRAM_TOKEN = "7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U"
+TELEGRAM_TOKEN = "7565394500:AAEqYMlT4mQFGTlL8slsSrlrst3MZmeMzIg"
+
+
 
 # TU CHAT ID - CAMBIA ESTE VALOR POR EL TUYO
 # Obtén tu Chat ID siguiendo estas instrucciones:
@@ -17,7 +19,7 @@ TELEGRAM_TOKEN = "7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U"
 # 2. Envía /start al bot
 # 3. Copia el Chat ID que te muestra
 # 4. Reemplaza el valor de abajo con tu Chat ID (sin las comillas)
-TELEGRAM_CHAT_ID = "1155484641"  # ⚠️ CONFIGURA TU CHAT ID AQUÍ
+TELEGRAM_CHAT_ID = "1846987938"# ⚠️ CONFIGURA TU CHAT ID AQUÍ
 
 # === CONFIGURACIÓN DE DETECCIÓN ===
 # Ajusta estos valores según tus necesidades

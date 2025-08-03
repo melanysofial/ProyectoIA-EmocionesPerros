@@ -206,21 +206,21 @@ class TelegramBot:
         if query.data == "status":
             status_text = self._get_current_status()
             # Agregar botón de mostrar menú
-            keyboard = [[InlineKeyboardButton("� Mostrar Menú", callback_data="show_menu")]]
+            keyboard = [[InlineKeyboardButton("  Mostrar Menú", callback_data="show_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             # Enviar mensaje nuevo en lugar de editar
             await query.message.reply_text(status_text, reply_markup=reply_markup, parse_mode='Markdown')
             
         elif query.data == "summary":
             summary_text = self._get_daily_summary()
-            keyboard = [[InlineKeyboardButton("� Mostrar Menú", callback_data="show_menu")]]
+            keyboard = [[InlineKeyboardButton("  Mostrar Menú", callback_data="show_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             # Enviar mensaje nuevo en lugar de editar
             await query.message.reply_text(summary_text, reply_markup=reply_markup, parse_mode='Markdown')
             
         elif query.data == "monitor_on":
             self.monitoring_active = True
-            keyboard = [[InlineKeyboardButton("� Mostrar Menú", callback_data="show_menu")]]
+            keyboard = [[InlineKeyboardButton("  Mostrar Menú", callback_data="show_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             # Enviar mensaje nuevo en lugar de editar
             await query.message.reply_text(
@@ -235,7 +235,7 @@ class TelegramBot:
             
         elif query.data == "monitor_off":
             self.monitoring_active = False
-            keyboard = [[InlineKeyboardButton("� Mostrar Menú", callback_data="show_menu")]]
+            keyboard = [[InlineKeyboardButton("  Mostrar Menú", callback_data="show_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             # Enviar mensaje nuevo en lugar de editar
             await query.message.reply_text(
@@ -251,7 +251,7 @@ class TelegramBot:
             
         elif query.data == "tips":
             tips_text = self._get_general_tips()
-            keyboard = [[InlineKeyboardButton("� Mostrar Menú", callback_data="show_menu")]]
+            keyboard = [[InlineKeyboardButton("  Mostrar Menú", callback_data="show_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             # Enviar mensaje nuevo en lugar de editar
             await query.message.reply_text(tips_text, reply_markup=reply_markup, parse_mode='Markdown')
@@ -272,7 +272,7 @@ class TelegramBot:
                 f"🔔 Monitoreo: {'✅ ACTIVO' if self.monitoring_active else '❌ PAUSADO'}\n\n"
                 "El sistema analiza las emociones de tu mascota y te mantiene informado."
             )
-            keyboard = [[InlineKeyboardButton("� Mostrar Menú", callback_data="show_menu")]]
+            keyboard = [[InlineKeyboardButton("  Mostrar Menú", callback_data="show_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             # Enviar mensaje nuevo en lugar de editar
             await query.message.reply_text(help_text, reply_markup=reply_markup, parse_mode='Markdown')
@@ -306,7 +306,7 @@ class TelegramBot:
                     parse_mode='Markdown'
                 )
             except Exception as e:
-                keyboard = [[InlineKeyboardButton("� Mostrar Menú", callback_data="show_menu")]]
+                keyboard = [[InlineKeyboardButton("  Mostrar Menú", callback_data="show_menu")]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 # Enviar mensaje nuevo en lugar de editar
                 await query.message.reply_text(
@@ -1085,3 +1085,5 @@ class TelegramBot:
             logger.error(f"❌ Error cerrando bot: {e}")
             # Si todo falla, al menos marcar como None
             self.application = None
+
+

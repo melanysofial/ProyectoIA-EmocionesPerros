@@ -2,9 +2,12 @@ import cv2
 import os
 import time
 import logging
+import requests
+import json
+import base64
 from pathlib import Path
 from utils.cam_utils import EmotionDetector
-from utils.telegram_utils import TelegramBot
+from utils.telegram_utils import TelegramBot    
 from utils.yolo_dog_detector import YoloDogDetector
 
 # Importar configuración desde archivo separado
@@ -15,8 +18,10 @@ try:
 except ImportError as e:
     # Configuración por defecto si no existe config.py
     print("⚠️ Archivo config.py no encontrado, usando configuración por defecto")
-    TELEGRAM_TOKEN = "7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U"
-    TELEGRAM_CHAT_ID = "1673887715"
+    #TELEGRAM_TOKEN = "7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U"
+    #TELEGRAM_CHAT_ID = "1673887715"
+    TELEGRAM_TOKEN = "7565394500:AAEqYMlT4mQFGTlL8slsSrlrst3MZmeMzIg"
+    TELEGRAM_CHAT_ID = "1846987938"
     YOLO_CONFIDENCE_THRESHOLD = 0.60
     EMOTION_ANALYSIS_INTERVAL = 2
     ALERT_THRESHOLD = 3
@@ -75,7 +80,7 @@ def verify_environment():
             return False
     
     # Verificar configuración de Telegram
-    if TELEGRAM_CHAT_ID == "1673887715":
+    if TELEGRAM_CHAT_ID == "1846987938":
         logger.warning("⚠️ USANDO CHAT ID POR DEFECTO - Configura el tuyo con @Emocionesperrunasbot")
     else:
         logger.info(f"✅ Chat ID configurado: {TELEGRAM_CHAT_ID}")
@@ -219,7 +224,7 @@ def process_video_file(video_path, save_output=False, output_path=None):
                         x, y, w, h = best_detection
                         emotion_text = f'EMOCION: {emotion.upper()} ({prob:.2f})'
                         cv2.putText(frame, emotion_text, (x, y + h + 30), 
-                                   cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
                     
                 except Exception as e:
                     logger.error(f"Error en análisis de emoción: {e}")
@@ -227,24 +232,24 @@ def process_video_file(video_path, save_output=False, output_path=None):
             else:
                 # Mensaje cuando no hay perros detectados
                 cv2.putText(frame, 'ESPERANDO DETECCION DE PERRO...', 
-                           (60, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+                (60, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
             
             # Mostrar información en el frame
             info_y = frame.shape[0] - 100
             cv2.putText(frame, f'Frame: {frame_count}/{total_frames}', (10, info_y), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
             cv2.putText(frame, f'Perros detectados: {len(dog_detections)}', (10, info_y + 20), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
             cv2.putText(frame, f'Emociones: {len(emotion_history)}/10', (10, info_y + 40), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
             
             # Controles
             status = "PAUSADO" if paused else "REPRODUCIENDO"
             cv2.putText(frame, f'{status} | ESPACIO: pausar | Q: salir | S: capturar', 
-                       (10, info_y + 60), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+            (10, info_y + 60), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
             
             # Mostrar frame
-            cv2.imshow('🎬 Procesador de Video - Dog Emotion Monitor', frame)
+            #cv2.imshow('🎬 Procesador de Video - Dog Emotion Monitor', frame)
             
             # Guardar frame si se configuró
             if out is not None:
@@ -393,24 +398,24 @@ def draw_enhanced_labels(frame, dog_detections, emotion_detected, emotion_prob, 
         
         # Fondo para etiqueta YOLO
         cv2.rectangle(frame, (x, y - yolo_size[1] - 10), 
-                     (x + yolo_size[0] + 5, y), box_color, -1)
+        (x + yolo_size[0] + 5, y), box_color, -1)
         
         # Texto YOLO
         cv2.putText(frame, yolo_label, (x, y - 5), 
-                   font, font_scale, (0, 0, 0), thickness)
+        font, font_scale, (0, 0, 0), thickness)
         
         # Fondo y texto para emoción si existe
         if emotion_label:
             emotion_y = y + h + yolo_size[1] + 15
             cv2.rectangle(frame, (x, emotion_y - emotion_size[1] - 5), 
-                         (x + emotion_size[0] + 5, emotion_y + 5), box_color, -1)
+            (x + emotion_size[0] + 5, emotion_y + 5), box_color, -1)
             cv2.putText(frame, emotion_label, (x, emotion_y), 
-                       font, font_scale, (0, 0, 0), thickness)
+            font, font_scale, (0, 0, 0), thickness)
     
     # Mensaje cuando no hay perros detectados
     if not dogs_detected:
         cv2.putText(frame, 'ESPERANDO DETECCION DE PERRO...', 
-                   (60, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+        (60, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
     
     return frame
 
@@ -562,12 +567,31 @@ def main():
                 try:
                     logger.info(f"🐕 Analizando emociones... (perro detectado)")
                     emotion, prob, preds = detector.predict_emotion(frame)
+
                     
                     # Debug: Mostrar todas las predicciones para entender el problema
                     logger.info("📊 Análisis detallado de emociones:")
                     for label, p in zip(detector.labels, preds):
                         logger.info(f"  {label}: {p:.4f} ({'⭐' if p == max(preds) else ''})")
                     logger.info(f"  🎯 Resultado final: {emotion.upper()} ({prob:.3f})")
+
+                    # 🔥 Enviar actualización al frontend (Socket.IO vía Flask)
+                    try:
+                        payload = {
+                            "dominant_emotion": emotion,
+                            "confidence": float(prob),
+                            "happy": float(preds[1]),
+                            "sad": float(preds[3]),
+                            "angry": float(preds[0]),
+                            "relaxed": float(preds[2])
+                        }
+                    # Envía los datos al endpoint de server.py (que lo retransmite a Socket.IO)
+                        requests.post("http://localhost:5000/emotion_update", json=payload, timeout=1)
+                        logger.info("📡 Datos enviados al frontend")
+                    except Exception as e:
+                        logger.warning(f"⚠️ No se pudo enviar actualización al frontend: {e}")
+
+
                     
                     # Verificar si hay un problema con la clasificación
                     if emotion == 'relaxed' and max(preds) < 0.6:
@@ -588,14 +612,14 @@ def main():
                         if best_detection:
                             x, y, w, h = best_detection
                             cv2.putText(frame, emotion_text, (x, y + h + 30), 
-                                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
                         else:
                             cv2.putText(frame, emotion_text, (60, 120), 
-                                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
                     else:
                         # Si no hay detección YOLO, mostrar en posición fija
                         cv2.putText(frame, emotion_text, (60, 120), 
-                                   cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
 
                     # Acumular historial de emociones
                     emotion_history.append(emotion)
@@ -641,7 +665,7 @@ def main():
             elif not dogs_detected:
                 # Solo mostrar mensaje de espera si no hay detecciones
                 cv2.putText(frame, 'ESPERANDO DETECCION DE PERRO...', 
-                           (60, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+                        (60, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
                 # Limpiar historial si no hay perros por mucho tiempo
                 if current_time - last_analysis_time > 30:  # 30 segundos sin perros
                     if emotion_history:
@@ -651,14 +675,26 @@ def main():
             # Mostrar información de estado en el frame
             info_y = frame.shape[0] - 100
             cv2.putText(frame, f'Frame: {frame_count}', (10, info_y), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
             cv2.putText(frame, f'Perros detectados: {len(dog_detections)}', (10, info_y + 20), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
             cv2.putText(frame, f'Historial emocional: {len(emotion_history)}/4', (10, info_y + 40), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
             cv2.putText(frame, 'Q: salir | S: test | M: menu | C: limpiar', (10, info_y + 60), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+            
+            # 🔥 ENVIAR FRAME AL DASHBOARD WEB
+            _, buffer = cv2.imencode('.jpg', frame)
+            frame_encoded = base64.b64encode(buffer).decode('utf-8')
+            try:
+                requests.post("http://localhost:5000/frame_update",
+                            json={"frame": frame_encoded}, timeout=0.5)
+                logger.info("📡 Frame enviado al frontend")
+            except Exception as e:
+                logger.warning(f"No se pudo enviar frame al frontend: {e}")
 
+            
+            #MUESTRA VENTANA LOCAL
             cv2.imshow('🐕 Dog Emotion Monitor + YOLOv8', frame)
 
             # Manejar teclas
@@ -675,13 +711,20 @@ def main():
                     if not bot.monitoring_active:
                         logger.warning("⚠️ Monitoreo pausado - Activando para la prueba")
                         bot.monitoring_active = True
+                    # Usar la última emoción detectada realmente
+                    if 'emotion' in locals() and 'prob' in locals():
+                        bot.send_alert(emotion, prob, image_path=test_path)
+                        logger.info(f"📱 Alerta enviada con emoción real: {emotion.upper()} ({prob:.2f})")
+                    else:
+                        logger.warning("⚠️ Aún no se ha detectado ninguna emoción para enviar.")    
                     
-                    bot.send_alert("happy", 0.95, image_path=test_path)
+                    #bot.send_alert("happy", 0.95, image_path=test_path)
                     os.remove(test_path)
                     logger.info("📱 Mensaje de prueba enviado - Revisa el menú con /menu")
                         
                 except Exception as e:
                     logger.error(f"Error enviando prueba: {e}")
+
             elif key == ord('m') and telegram_enabled and bot:  # M para menú
                 try:
                     bot.send_simple_message("🎛️ Usa /menu para acceder a todas las opciones del bot")
