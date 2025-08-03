@@ -1,0 +1,113 @@
+/* ==== ESTILOS GENERALES ==== */
+body {
+    color: white;
+    font-family: Arial, sans-serif;
+    background: #f3dcdb;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+/* ==== HERO ==== */
+.hero {
+    background: 
+        linear-gradient(135deg, rgba(189, 136, 178, 0.6), rgba(119, 125, 136, 0.6)),
+        url('img/perritoFondo.jpeg');
+    background-size: cover;
+    background-position: center 79%;
+    background-attachment: scroll;
+    color: white;
+    padding: 80px 20px;
+    position: relative;
+}
+
+.hero h1 {
+    font-size: 40px;
+}
+.hero p {
+    font-size: 20px;
+    margin-bottom: 20px;
+    padding: 5%;
+}
+
+/* Botón principal */
+.btn-cta {
+    background: #ffcc00;
+    color: #000;
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.3s;
+}
+.btn-cta:hover {
+    background: #ffdb4d;
+}
+
+/* ==== BENEFICIOS ==== */
+.beneficios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 40px 20px;
+}
+.card {
+    background: rgb(61, 70, 104);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* ==== COMO FUNCIONA ==== */
+.como-funciona {
+    background: #fff;
+    padding: 10px 20px;
+}
+.como-funciona h2 {
+    font-size: 50px;
+}
+.como-funciona p{
+    font-size: 25px;
+}
+.pasos {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+.pasos div {
+    background: #e6e6e6;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* ==== CTA FINAL ==== */
+.cta-final {
+    background: #a670bf;
+    color: white;
+    padding: 60px 20px;
+}
+.cta-final h2 {
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
+/* Animación de aparición suave */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero h1 {
+    animation: fadeIn 1s ease forwards;
+}
+
+.hero p {
+    animation: fadeIn 1.5s ease forwards;
+}
+
+.hero .btn-cta {
+    animation: fadeIn 4s ease forwards;
+}
