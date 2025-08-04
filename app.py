@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 # Importar utilidades
 from utils.cam_utils import EmotionDetector
-from utils.telegram_utils import TelegramBot
+from utils.telegram_simple import SimpleTelegramBot as TelegramBot
 from utils.yolo_dog_detector import YoloDogDetector
 
 # Configurar logging con formato mejorado
