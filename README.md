@@ -58,9 +58,20 @@ Sistema inteligente para detectar y monitorear el estado emocional de perros usa
 ### Paso 2: Configurar el Bot de Telegram
 
 #### 2.1 Conectar con el Bot Preconfigurado
-1. **Abre Telegram** y busca el bot: **@Emocionesperrunasbot**
-   
-   O usa este enlace directo: **[t.me/Emocionesperrunasbot](https://t.me/Emocionesperrunasbot)**
+
+**🤖 Bot de Telegram: @Emocionesperrunasbot**
+
+<div align="center">
+  <img src="LandingPage/assets/images/CodigoQr/Codigo.jpg" alt="Código QR del Bot" width="200">
+  
+  **Escanea el código QR o usa el enlace directo:**
+  
+  **[t.me/Emocionesperrunasbot](https://t.me/Emocionesperrunasbot)**
+</div>
+
+**Pasos para conectar:**
+
+1. **Escanea el código QR** con tu app de Telegram o busca manualmente: **@Emocionesperrunasbot**
 
 2. **Envía `/start`** para inicializar el bot
 

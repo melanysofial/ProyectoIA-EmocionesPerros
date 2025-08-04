@@ -346,7 +346,7 @@ def main():
         logger.info("📱 Inicializando bot de Telegram...")
         bot = TelegramBot(
             token="7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U", 
-            chat_id="1673887715"
+            chat_id="1234152784"
         )
         logger.info("✅ Bot de Telegram iniciado")
         

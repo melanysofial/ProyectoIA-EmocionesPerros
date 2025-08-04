@@ -16,7 +16,7 @@ class TelegramBot:
     def __init__(self, token=None, chat_id=None):
         # Obtener token y chat_id de parámetros o variables de entorno
         self.token = token or os.getenv('TELEGRAM_BOT_TOKEN', '7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U')
-        self.chat_id = chat_id or os.getenv('TELEGRAM_CHAT_ID', '1673887715')
+        self.chat_id = chat_id or os.getenv('TELEGRAM_CHAT_ID', '1234152784')
         
         if not self.token:
             raise ValueError("❌ Token de Telegram no proporcionado. Usa el parámetro 'token' o la variable de entorno 'TELEGRAM_BOT_TOKEN'")
