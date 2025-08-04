@@ -772,11 +772,295 @@
         .hidden {
             display: none !important;
         }
+
+        /* Enhanced Analysis Counter */
+        .analysis-counter-enhanced {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(139, 0, 255, 0.1));
+            border: 2px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+            position: relative;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .analysis-counter-enhanced:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
+        }
+
+        .counter-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .counter-header h4 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .counter-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--gold);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .progress-container {
+            margin: 1.5rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--primary));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .counter-status {
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            opacity: 0.9;
+        }
+
+        .upgrade-button {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 110, 0.3);
+        }
+
+        .upgrade-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 0, 110, 0.5);
+        }
+
+        .limit-reached {
+            border-color: var(--secondary) !important;
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.15), rgba(139, 0, 255, 0.1)) !important;
+        }
+
+        .limit-reached .counter-display {
+            color: var(--secondary) !important;
+            text-shadow: 0 0 15px rgba(255, 0, 110, 0.6) !important;
+        }
+
+        /* Advanced Futuristic Enhancements */
+        
+        /* Animated border glow effect */
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                var(--primary), var(--secondary), var(--accent), var(--gold), 
+                var(--primary), var(--secondary), var(--accent), var(--gold));
+            background-size: 400% 400%;
+            border-radius: 25px;
+            z-index: -1;
+            opacity: 0;
+            animation: borderGlow 3s ease-in-out infinite;
+            transition: opacity 0.3s ease;
+        }
+
+        .option-card:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { background-position: 0% 50%; }
+            25% { background-position: 100% 50%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+        }
+
+        /* Holographic effect for main titles */
+        .hero-title, .try-title {
+            background: linear-gradient(45deg, 
+                var(--primary), var(--secondary), var(--accent), var(--gold));
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: holographic 4s ease-in-out infinite;
+        }
+
+        @keyframes holographic {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Floating animation for icons */
+        .option-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .option-card:nth-child(2) .option-icon {
+            animation-delay: -1s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Pulse effect for buttons */
+        .btn-primary, .cta-button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::after, .cta-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: all 0.5s ease;
+        }
+
+        .btn-primary:hover::after, .cta-button:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Enhanced glass morphism */
+        .glass-card, .analysis-counter-enhanced, .option-card {
+            backdrop-filter: blur(15px) saturate(200%);
+            -webkit-backdrop-filter: blur(15px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1), 
+                rgba(255, 255, 255, 0.05));
+        }
+
+        /* Scanning line effect */
+        .scanner-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, var(--primary), transparent);
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        /* Data stream effect for background */
+        .data-stream {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .data-stream::before {
+            content: '01001001 01001000 01010101 01001110 01000001 01001001 01000101 01001101 01001111 01010100 01001001 01001111 01001110 01000001 01001001';
+            position: absolute;
+            top: -20px;
+            left: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+            white-space: nowrap;
+            animation: dataFlow 15s linear infinite;
+        }
+
+        @keyframes dataFlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100vw); }
+        }
+
+        /* Enhanced shadows and depth */
+        .hero, .try-section, .about-section {
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* Improved status text with pulsing effect */
+        .status-text {
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* Circuit pattern overlay */
+        .circuit-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300d4ff' fill-opacity='0.05'%3E%3Cpath d='M30 30h20v20H30zM10 10h20v20H10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            opacity: 0.3;
+        }
     </style>
 </head>
 <body>
     <!-- Efectos de fondo -->
     <div class="gradient-bg"></div>
+    <div class="data-stream"></div>
+    <div class="scanner-line"></div>
     <canvas id="particles-canvas"></canvas>
 
     <!-- Header -->
@@ -796,13 +1080,30 @@
 
     <!-- Sección de prueba principal -->
     <section class="try-section">
+        <div class="circuit-overlay"></div>
         <h3 class="try-title">¡Haz la prueba hoy mismo!</h3>
         <p class="try-subtitle">Descubre las emociones de tu mascota</p>
 
-        <!-- Contador de análisis -->
-        <div class="analysis-counter" id="analysisCounter">
-            <div class="counter-text" id="counterText">
-                Te quedan {{ remaining_analyses }} análisis gratuitos
+        <!-- Contador de análisis mejorado -->
+        <div class="analysis-counter-enhanced">
+            <div class="counter-header">
+                <h4>🎯 Estado de tu Cuenta</h4>
+            </div>
+            <div class="counter-content">
+                <div class="counter-display" id="analysisCounter">
+                    5/5 Análisis Gratuitos
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="analysisProgressBar"></div>
+                    </div>
+                </div>
+                <div class="status-text" id="analysisStatusText">
+                    ✅ Análisis gratuitos disponibles
+                </div>
+                <button class="upgrade-btn" id="upgradeBtn" onclick="window.paymentSystem?.showPaymentModal()" style="display: none;">
+                    🌟 Desbloquear Premium
+                </button>
             </div>
         </div>
 
@@ -1040,6 +1341,8 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/enhanced_results.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/payment_system.js') }}"></script>
     <script>
         // Variables globales
         let socket;
@@ -1289,6 +1592,16 @@
         function displayResults(data) {
             const resultsContainer = document.getElementById('resultsContainer');
             const analysisResults = document.getElementById('analysisResults');
+
+            // Si es un video, usar el sistema mejorado
+            if (data.type === 'video' && window.displayEnhancedResults) {
+                resultsContainer.style.display = 'block';
+                resultsContainer.classList.add('show');
+                window.displayEnhancedResults(data);
+                updateAnalysisCount();
+                resultsContainer.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
 
             let resultsHTML = '';
 

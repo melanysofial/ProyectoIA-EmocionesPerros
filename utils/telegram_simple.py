@@ -227,42 +227,129 @@ class SimpleTelegramBot:
             return False
     
     def send_video_summary(self, video_stats: Dict[str, Any]) -> bool:
-        """Enviar resumen de análisis de video"""
+        """Enviar resumen COMPLETO de análisis de video con gráficos y video procesado"""
         try:
             if not self.monitoring_active:
                 logger.info("⚠️ Monitoreo pausado - Resumen no enviado")
                 return False
             
-            logger.info("📹 Enviando resumen de video...")
+            logger.info("📹 Enviando resumen completo de video...")
             
             stats = video_stats
             emotion_dist = stats.get('emotion_distribution', {})
             dominant = stats.get('dominant_emotion', 'unknown')
             confidence = stats.get('confidence_avg', 0)
+            video_path = stats.get('video_path', '')
             
-            message = f"📹 **RESUMEN DE VIDEO**\n\n"
-            message += f"Archivo: {stats.get('video_name', 'video.mp4')}\n"
-            message += f"Total de análisis: {stats.get('total_emotions', 0)}\n\n"
+            # PARTE 1: Resumen con video procesado
+            if video_path and os.path.exists(video_path):
+                logger.info("📤 Enviando video procesado...")
+                video_caption = (
+                    f"🎬 **ANÁLISIS DE VIDEO COMPLETADO**\n\n"
+                    f"✅ Análisis de emociones completado\n"
+                    f"🐕 Detecciones YOLO superpuestas\n"
+                    f"📊 Resumen detallado a continuación"
+                )
+                
+                # Enviar video procesado
+                if self.send_video(video_path, video_caption):
+                    logger.info("✅ Video procesado enviado")
+                else:
+                    logger.warning("⚠️ No se pudo enviar video, continuando con resumen")
             
-            message += "📊 **Distribución emocional:**\n"
+            # PARTE 2: Resumen estadístico DETALLADO
+            message = f"📊 **ANÁLISIS DE VIDEO COMPLETADO**\n\n"
+            
+            # Información del archivo
+            message += f"📁 **Video:**\n"
+            message += f"{stats.get('video_name', 'video.mp4')}\n"
+            message += f"🎯 Detecciones totales: {stats.get('total_emotions', 0)}\n\n"
+            
+            # Emoción dominante destacada
+            emotion_emoji = {'happy': '😊', 'sad': '😢', 'angry': '😠', 'relaxed': '😌'}
+            dominant_emoji = emotion_emoji.get(dominant, '🐕')
+            message += f"🎯 **Emoción dominante: {dominant.upper()}** {dominant_emoji}\n\n"
+            
+            # Distribución con barras visuales
+            message += "📊 **Distribución:**\n"
             for emotion, count in emotion_dist.items():
-                percentage = (count / stats.get('total_emotions', 1)) * 100
-                message += f"• {emotion.capitalize()}: {count} ({percentage:.1f}%)\n"
+                if count > 0:
+                    percentage = (count / stats.get('total_emotions', 1)) * 100
+                    emoji = emotion_emoji.get(emotion, '•')
+                    # Crear barra visual simple
+                    bar_length = int(percentage / 10)  # Máximo 10 caracteres
+                    bar = '█' * bar_length + '░' * (10 - bar_length)
+                    message += f"{emoji} **{emotion.upper()}:** {count} ({percentage:.1f}%) {bar}\n"
             
-            message += f"\n🎯 **Emoción dominante:** {dominant.upper()}\n"
-            message += f"📈 **Confianza promedio:** {confidence*100:.1f}%\n"
-            message += f"⏰ **Hora:** {datetime.now().strftime('%H:%M:%S')}"
+            # Estadísticas técnicas
+            message += f"\n📈 **Estadísticas:**\n"
+            message += f"📊 Confianza promedio: {confidence*100:.1f}%\n"
+            message += f"🎥 Frames procesados: {stats.get('total_frames', 'N/A')}\n"
+            message += f"🐕 Detección de perros: {stats.get('detection_rate', 'N/A')}\n"
+            message += f"⚡ Velocidad: {stats.get('fps', 'N/A')} FPS\n"
             
+            # Recomendaciones basadas en resultados
+            message += f"\n💡 **Recomendación:**\n"
+            if dominant == 'happy':
+                message += "Perfecto estado de alegría. 😊\n• Continúa con las actividades que lo hacen feliz\n• Tu perro está en su zona de comfort"
+            elif dominant == 'relaxed':
+                message += "Perfecto estado de relajación. 😌\n• Mantén el ambiente tranquilo\n• Tu perro está en su zona de comfort"
+            elif dominant == 'sad':
+                message += "Se detectó tristeza. 😢\n• Dedícale más tiempo y atención\n• Verifica si tiene alguna molestia\n• Considera actividades estimulantes"
+            elif dominant == 'angry':
+                message += "Se detectó agitación. 😠\n• Identifica fuentes de estrés\n• Proporciona un espacio tranquilo\n• Evita estímulos molestos"
+            
+            # Información final
+            message += f"\n📱 **Video procesado guardado:**\n"
+            message += f"{stats.get('processed_filename', 'video_procesado.mp4')}\n\n"
+            message += f"⏰ **Análisis completado:** {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+            
+            # Enviar resumen completo
             success = self.send_message(message)
             if success:
-                logger.info("✅ Resumen de video enviado")
+                logger.info("✅ Resumen completo de video enviado")
                 return True
             else:
-                logger.error("❌ Error enviando resumen")
+                logger.error("❌ Error enviando resumen completo")
                 return False
                 
         except Exception as e:
             logger.error(f"❌ Error enviando resumen: {e}")
+            return False
+    
+    def send_video(self, video_path: str, caption: str = "") -> bool:
+        """Enviar video con caption"""
+        try:
+            if not os.path.exists(video_path):
+                logger.error(f"❌ Video no encontrado: {video_path}")
+                return False
+            
+            # Verificar tamaño del archivo (Telegram tiene límite de 50MB)
+            file_size = os.path.getsize(video_path)
+            if file_size > 50 * 1024 * 1024:  # 50MB
+                logger.warning(f"⚠️ Video muy grande ({file_size / (1024*1024):.1f}MB), enviando solo resumen")
+                return False
+            
+            data = {
+                'chat_id': self.chat_id,
+                'caption': caption,
+                'parse_mode': 'Markdown'
+            }
+            
+            with open(video_path, 'rb') as video_file:
+                files = {'video': video_file}
+                result = self._make_request('sendVideo', data, files, timeout=60)  # Timeout más largo para videos
+            
+            if result:
+                message_id = result['result']['message_id']
+                logger.info(f"✅ Video enviado - ID: {message_id}")
+                return True
+            else:
+                logger.error("❌ Error enviando video")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ Error enviando video: {e}")
             return False
     
     def send_welcome_message(self) -> bool:
