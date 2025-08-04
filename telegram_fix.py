@@ -152,8 +152,8 @@ def send_alert_fixed(token, chat_id, emotion, probability, image_path=None):
 
 if __name__ == "__main__":
     # Test rápido
-    TOKEN = "7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U"
-    CHAT_ID = "1673887715"
+    TOKEN = "7565394500:AAEqYMlT4mQFGTlL8slsSrlrst3MZmeMzIg"
+    CHAT_ID = "1846987938"
     
     logging.basicConfig(level=logging.INFO)
     

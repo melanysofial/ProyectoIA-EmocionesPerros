@@ -44,8 +44,8 @@ executor = ThreadPoolExecutor(max_workers=4)  # Pool para tareas asíncronas
 
 # Configuración
 ANALYSIS_LIMIT = 5  # Límite de análisis gratuitos por IP
-TELEGRAM_TOKEN = "7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U"
-TELEGRAM_CHAT_ID = "1673887715"
+TELEGRAM_TOKEN = "7565394500:AAEqYMlT4mQFGTlL8slsSrlrst3MZmeMzIg"
+TELEGRAM_CHAT_ID = "1846987938"
 ALERT_COOLDOWN_SECONDS = 30  # Tiempo mínimo entre alertas
 EMOTION_THRESHOLD = 0.7  # Umbral de confianza para alertas
 

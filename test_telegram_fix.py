@@ -32,8 +32,8 @@ def test_telegram_connection():
         from utils.telegram_simple import SimpleTelegramBot
         
         # Configuración
-        TOKEN = "7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U"
-        CHAT_ID = "1673887715"
+        TOKEN = "7565394500:AAEqYMlT4mQFGTlL8slsSrlrst3MZmeMzIg"
+        CHAT_ID = "1846987938"
         
         print(f"📱 Token: {TOKEN[:20]}...")
         print(f"💬 Chat ID: {CHAT_ID}")
@@ -141,8 +141,8 @@ def test_app_integration():
         
         # Probar creación de bot
         print("\n🤖 Probando creación de bot...")
-        TOKEN = "7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U"
-        CHAT_ID = "1673887715"
+        TOKEN = "7565394500:AAEqYMlT4mQFGTlL8slsSrlrst3MZmeMzIg"
+        CHAT_ID = "1846987938"
         
         bot = TelegramBot(TOKEN, CHAT_ID)
         print("✅ Bot creado sin errores")

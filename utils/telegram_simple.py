@@ -19,8 +19,8 @@ class SimpleTelegramBot:
     """Bot de Telegram simplificado usando requests directamente"""
     
     def __init__(self, token: str = None, chat_id: str = None):
-        self.token = token or os.getenv('TELEGRAM_BOT_TOKEN', '7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U')
-        self.chat_id = chat_id or os.getenv('TELEGRAM_CHAT_ID', '1673887715')
+        self.token = token or os.getenv('TELEGRAM_BOT_TOKEN', '7565394500:AAEqYMlT4mQFGTlL8slsSrlrst3MZmeMzIg')
+        self.chat_id = chat_id or os.getenv('TELEGRAM_CHAT_ID', '1846987938')
         self.base_url = f"https://api.telegram.org/bot{self.token}"
         
         # Estado del monitoreo
