@@ -2,3 +2,32 @@
 2025-08-04 07:39:58 - [INFO] - __main__ - 🚀 Iniciando Dog Emotion AI - Aplicación Web Optimizada
 2025-08-04 07:39:58 - [INFO] - __main__ - ======================================================================
 2025-08-04 07:39:58 - [INFO] - __main__ - 🔍 Analizando sistema...
+2025-08-04 07:40:06 - [INFO] - __main__ - 📊 Sistema: Windows-11-10.0.26100-SP0
+2025-08-04 07:40:06 - [INFO] - __main__ - 🐍 Python: 3.13.2
+2025-08-04 07:40:06 - [INFO] - __main__ - 💻 CPUs: 16
+2025-08-04 07:40:06 - [INFO] - __main__ - 🎮 GPU: No disponible
+2025-08-04 07:40:06 - [INFO] - __main__ - 🔍 Verificando dependencias...
+2025-08-04 07:40:06 - [INFO] - __main__ - 🔍 Verificando dependencias con sistema optimizado...
+2025-08-04 07:40:16 - [INFO] - __main__ - 📦 Paquetes instalados:
+2025-08-04 07:40:16 - [INFO] - __main__ -   ✓ opencv-python: 4.11.0
+2025-08-04 07:40:16 - [INFO] - __main__ -   ✓ tensorflow: 2.20.0-rc0
+2025-08-04 07:40:16 - [INFO] - __main__ -   ✓ numpy: 2.3.0
+2025-08-04 07:40:16 - [INFO] - __main__ -   ✓ pillow: 11.2.1
+2025-08-04 07:40:16 - [INFO] - __main__ -   ✓ flask: 3.1.1
+2025-08-04 07:40:16 - [INFO] - __main__ -   ✓ eventlet: 0.40.2
+2025-08-04 07:40:16 - [INFO] - __main__ -   ✓ flask-socketio: Unknown
+2025-08-04 07:40:16 - [INFO] - __main__ -   ✓ ultralytics: 8.3.170
+2025-08-04 07:40:16 - [INFO] - __main__ - ✅ Dependencias verificadas
+2025-08-04 07:40:16 - [INFO] - __main__ - 🏗️ Verificando estructura del proyecto...
+2025-08-04 07:40:16 - [INFO] - __main__ - 📁 Creado directorio: static/css
+2025-08-04 07:40:16 - [INFO] - __main__ - 📁 Creado directorio: static/js
+2025-08-04 07:40:16 - [INFO] - __main__ - 📁 Creado directorio: static/img
+2025-08-04 07:40:16 - [INFO] - __main__ - 📁 Creado directorio: uploads
+2025-08-04 07:40:16 - [INFO] - __main__ - ✅ Estructura del proyecto verificada
+2025-08-04 07:40:16 - [INFO] - __main__ - 🧠 Verificando modelos de IA...
+2025-08-04 07:40:16 - [INFO] - __main__ - ✅ emotion_model: modelo\mejor_modelo_83.h5 (22.59 MB)
+2025-08-04 07:40:16 - [INFO] - __main__ - ✅ yolo_model: yolov8n.pt (6.25 MB)
+2025-08-04 07:40:18 - [INFO] - __main__ - 🔄 Inicializando modelos de IA...
+2025-08-04 07:40:19 - [INFO] - __main__ - 🌐 Navegador abierto automáticamente
+2025-08-04 07:40:29 - [INFO] - __main__ - ✅ Modelos cargados correctamente
+2025-08-04 07:40:29 - [INFO] - __main__ - ▶️ Servidor web iniciado exitosamente
