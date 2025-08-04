@@ -1,0 +1,42 @@
+{
+  "opencv-python_3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)]": {
+    "installed": true,
+    "version": "4.11.0",
+    "timestamp": 1754311206.7321336
+  },
+  "tensorflow_3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)]": {
+    "installed": true,
+    "version": "2.20.0-rc0",
+    "timestamp": 1754311206.7329168
+  },
+  "numpy_3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)]": {
+    "installed": true,
+    "version": "2.3.0",
+    "timestamp": 1754311206.7380836
+  },
+  "pillow_3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)]": {
+    "installed": true,
+    "version": "11.2.1",
+    "timestamp": 1754311206.7381444
+  },
+  "flask_3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)]": {
+    "installed": true,
+    "version": "3.1.1",
+    "timestamp": 1754311207.2769005
+  },
+  "eventlet_3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)]": {
+    "installed": true,
+    "version": "0.40.2",
+    "timestamp": 1754311210.3375785
+  },
+  "flask-socketio_3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)]": {
+    "installed": true,
+    "version": "Unknown",
+    "timestamp": 1754311210.5050642
+  },
+  "ultralytics_3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)]": {
+    "installed": true,
+    "version": "8.3.170",
+    "timestamp": 1754311216.5531785
+  }
+}

@@ -1,0 +1,36 @@
+2025-08-04 07:24:32,929 - INFO - 🚀 Iniciando Dog Emotion AI - Aplicación Web
+2025-08-04 07:24:32,929 - INFO - ============================================================
+2025-08-04 07:24:32,929 - INFO - 🔍 Verificando dependencias...
+2025-08-04 07:24:46,159 - ERROR - ❌ Faltan dependencias requeridas:
+2025-08-04 07:24:46,159 - ERROR -   - opencv-python
+2025-08-04 07:24:46,159 - ERROR -   - pillow
+2025-08-04 07:24:46,160 - INFO - 💡 Instala las dependencias con:
+2025-08-04 07:24:46,160 - INFO - pip install -r requirements.txt
+2025-08-04 07:24:46,160 - ERROR - ❌ La aplicación terminó con errores
+2025-08-04 07:25:02,101 - INFO - 🚀 Iniciando Dog Emotion AI - Aplicación Web
+2025-08-04 07:25:02,102 - INFO - ============================================================
+2025-08-04 07:25:02,102 - INFO - 🔍 Verificando dependencias...
+2025-08-04 07:25:09,430 - ERROR - ❌ Faltan dependencias requeridas:
+2025-08-04 07:25:09,430 - ERROR -   - opencv-python
+2025-08-04 07:25:09,430 - ERROR -   - pillow
+2025-08-04 07:25:09,430 - INFO - 💡 Instala las dependencias con:
+2025-08-04 07:25:09,430 - INFO - pip install -r requirements.txt
+2025-08-04 07:25:09,431 - ERROR - ❌ La aplicación terminó con errores
+2025-08-04 07:26:39,226 - INFO - 🚀 Iniciando Dog Emotion AI - Aplicación Web
+2025-08-04 07:26:39,227 - INFO - ============================================================
+2025-08-04 07:26:39,227 - INFO - 🔍 Verificando dependencias...
+2025-08-04 07:26:46,670 - ERROR - ❌ Faltan dependencias requeridas:
+2025-08-04 07:26:46,671 - ERROR -   - opencv-python
+2025-08-04 07:26:46,671 - ERROR -   - pillow
+2025-08-04 07:26:46,671 - INFO - 💡 Instala las dependencias con:
+2025-08-04 07:26:46,672 - INFO - pip install -r requirements.txt
+2025-08-04 07:26:46,672 - ERROR - ❌ La aplicación terminó con errores
+2025-08-04 07:27:05,583 - INFO - 🚀 Iniciando Dog Emotion AI - Aplicación Web
+2025-08-04 07:27:05,583 - INFO - ============================================================
+2025-08-04 07:27:05,584 - INFO - 🔍 Verificando dependencias...
+2025-08-04 07:27:12,485 - ERROR - ❌ Faltan dependencias requeridas:
+2025-08-04 07:27:12,486 - ERROR -   - opencv-python
+2025-08-04 07:27:12,486 - ERROR -   - pillow
+2025-08-04 07:27:12,486 - INFO - 💡 Instala las dependencias con:
+2025-08-04 07:27:12,487 - INFO - pip install -r requirements.txt
+2025-08-04 07:27:12,487 - ERROR - ❌ La aplicación terminó con errores

@@ -4,3 +4,6 @@ numpy
 Pillow
 python-telegram-bot
 ultralytics
+flask
+flask-socketio
+eventlet

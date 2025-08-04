@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐕 Dog Emotion AI - Análisis Emocional de Mascotas</title>
+    
+    <!-- Fuentes y librerías -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Exo+2:wght@200;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --secondary: #ff006e;
+            --accent: #8b00ff;
+            --gold: #ffd700;
+            --dark: #0a0a0a;
+            --darker: #050505;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --neon-glow: rgba(0, 212, 255, 0.8);
+            --purple-glow: rgba(139, 0, 255, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--dark);
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Canvas de fondo con partículas */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            filter: contrast(1.2) brightness(1.1);
+        }
+
+        /* Gradientes animados */
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 120%;
+            height: 120%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 0, 255, 0.25) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 0, 110, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, #000428, #004e92, #009ffd, #00d4ff);
+            background-size: 300% 300%;
+            animation: gradientShift 20s ease infinite;
+            opacity: 0.4;
+            z-index: -2;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; transform: rotate(0deg); }
+            25% { background-position: 100% 0%; transform: rotate(90deg); }
+            50% { background-position: 100% 100%; transform: rotate(180deg); }
+            75% { background-position: 0% 100%; transform: rotate(270deg); }
+            100% { background-position: 0% 50%; transform: rotate(360deg); }
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            padding: 2rem;
+            background: var(--glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3rem;
+            animation: slideDown 1.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100px) rotateX(-90deg);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) rotateX(0deg);
+                opacity: 1;
+            }
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--accent), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            animation: logoHover 3s ease-in-out infinite;
+        }
+
+        @keyframes logoHover {
+            0%, 100% { 
+                transform: scale(1);
+                filter: drop-shadow(0 0 20px var(--neon-glow));
+            }
+            33% { 
+                transform: scale(1.02);
+                filter: drop-shadow(0 0 30px var(--purple-glow));
+            }
+            66% { 
+                transform: scale(1.02);
+                filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.6));
+            }
+        }
+
+        .dog-icon {
+            font-size: 4.5rem;
+            animation: dogFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.8));
+        }
+
+        @keyframes dogFloat {
+            0%, 100% { 
+                transform: translateY(0) rotateZ(0deg) scale(1);
+            }
+            25% { 
+                transform: translateY(-15px) rotateZ(5deg) scale(1.1);
+            }
+            50% { 
+                transform: translateY(-10px) rotateZ(0deg) scale(1.05);
+            }
+            75% { 
+                transform: translateY(-20px) rotateZ(-5deg) scale(1.1);
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.1), transparent);
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff, var(--primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { 
+                filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+                transform: scale(1);
+            }
+            50% { 
+                filter: drop-shadow(0 0 40px var(--neon-glow));
+                transform: scale(1.02);
+            }
+        }
+
+        .hero-subtitle {
+            font-size: 1.8rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+            background: linear-gradient(90deg, rgba(255,255,255,0.8), var(--primary), rgba(255,255,255,0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: subtitleWave 3s ease-in-out infinite;
+        }
+
+        @keyframes subtitleWave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Sección de prueba */
+        .try-section {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .try-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+            animation: scanLine 3s ease-in-out infinite;
+        }
+
+        @keyframes scanLine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .try-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .try-subtitle {
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        /* Contador de análisis */
+        .analysis-counter {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid var(--gold);
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 2rem 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .analysis-counter.limit-reached {
+            background: rgba(255, 0, 110, 0.1);
+            border-color: var(--secondary);
+        }
+
+        .counter-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .counter-text.limit-reached {
+            color: var(--secondary);
+        }
+
+        /* Opciones de análisis */
+        .analysis-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .option-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 15px 35px rgba(0, 212, 255, 0.25);
+        }
+
+        .option-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .option-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 10px var(--neon-glow));
+        }
+
+        .option-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .option-description {
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Botones */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.5);
+            border: 2px solid transparent;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 212, 255, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Área de análisis */
+        .analysis-area {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            min-height: 400px;
+            display: none;
+            position: relative;
+        }
+
+        .analysis-area.active {
+            display: block;
+        }
+
+        /* Área de video/imagen */
+        .media-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            position: relative;
+        }
+
+        #videoElement, #imagePreview {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--primary);
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .upload-area:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--gold);
+        }
+
+        .upload-area.drag-over {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: var(--gold);
+            transform: scale(1.02);
+        }
+
+        /* Resultados del análisis */
+        .results-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .results-container.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .emotion-bars {
+            display: grid;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .emotion-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .emotion-icon {
+            font-size: 2rem;
+            min-width: 50px;
+        }
+
+        .emotion-label {
+            min-width: 100px;
+            font-weight: bold;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            transition: width 0.8s ease;
+            width: 0%;
+            position: relative;
+        }
+
+        .bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: fillShine 2s ease-in-out infinite;
+        }
+
+        @keyframes fillShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .bar-percentage {
+            font-weight: bold;
+            min-width: 60px;
+            text-align: right;
+            color: var(--primary);
+        }
+
+        /* Modal de pago */
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .payment-modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .payment-content {
+            background: var(--glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 2px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Sección de Telegram */
+        .telegram-section {
+            background: rgba(0, 136, 204, 0.1);
+            border: 1px solid rgba(0, 136, 204, 0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 3rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+
+        .telegram-section.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .telegram-icon {
+            font-size: 4rem;
+            color: #0088cc;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 20px rgba(0, 136, 204, 0.8));
+            animation: telegramPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes telegramPulse {
+            0%, 100% { 
+                transform: scale(1);
+                filter: drop-shadow(0 0 20px rgba(0, 136, 204, 0.8));
+            }
+            50% { 
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 30px rgba(0, 136, 204, 1));
+            }
+        }
+
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 2rem;
+            background: var(--glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 2px solid var(--glass-border);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transform: translateX(400px);
+            transition: all 0.4s ease;
+            z-index: 1000;
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-color: #00ff88;
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.4);
+        }
+
+        .toast.error {
+            border-color: #ff4444;
+            box-shadow: 0 10px 40px rgba(255, 68, 68, 0.4);
+        }
+
+        .toast.info {
+            border-color: var(--primary);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .logo { font-size: 2.5rem; }
+            .analysis-options { grid-template-columns: 1fr; }
+            .try-section { padding: 2rem 1rem; }
+            .dog-icon { font-size: 3rem; }
+        }
+
+        /* About section */
+        .about-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 3rem auto;
+            max-width: 1200px;
+        }
+
+        .about-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .about-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .about-card h3 {
+            color: var(--gold);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .team-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .team-title {
+            color: var(--accent);
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .team-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .team-member {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Efectos de fondo -->
+    <div class="gradient-bg"></div>
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <span class="dog-icon">🐕</span>
+            <h1 class="logo">DOG EMOTION AI</h1>
+            <span class="dog-icon">🐕</span>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h2 class="hero-title">Análisis Emocional Ultra Avanzado</h2>
+        <p class="hero-subtitle">Descubre las emociones de tu mascota con Inteligencia Artificial de vanguardia</p>
+    </section>
+
+    <!-- Sección de prueba principal -->
+    <section class="try-section">
+        <h3 class="try-title">¡Haz la prueba hoy mismo!</h3>
+        <p class="try-subtitle">Descubre las emociones de tu mascota</p>
+
+        <!-- Contador de análisis -->
+        <div class="analysis-counter" id="analysisCounter">
+            <div class="counter-text" id="counterText">
+                Te quedan {{ remaining_analyses }} análisis gratuitos
+            </div>
+        </div>
+
+        <!-- Opciones de análisis -->
+        <div class="analysis-options">
+            <div class="option-card" id="cameraOption" onclick="startCameraAnalysis()">
+                <div class="option-icon">
+                    <i class="fas fa-video"></i>
+                </div>
+                <h4 class="option-title">Cámara en Tiempo Real</h4>
+                <p class="option-description">
+                    Analiza las emociones de tu mascota en vivo usando tu cámara web
+                </p>
+                <button class="btn btn-primary">
+                    <i class="fas fa-play"></i> Iniciar Cámara
+                </button>
+            </div>
+
+            <div class="option-card" id="uploadOption" onclick="showUploadArea()">
+                <div class="option-icon">
+                    <i class="fas fa-upload"></i>
+                </div>
+                <h4 class="option-title">Subir Archivos</h4>
+                <p class="option-description">
+                    Sube fotos o videos de tu mascota para análisis detallado
+                </p>
+                <button class="btn btn-primary">
+                    <i class="fas fa-cloud-upload-alt"></i> Subir Archivo
+                </button>
+            </div>
+        </div>
+
+        <!-- Área de análisis -->
+        <div class="analysis-area" id="analysisArea">
+            <!-- Cámara en tiempo real -->
+            <div id="cameraSection" class="hidden">
+                <h4 style="text-align: center; margin-bottom: 1rem; color: var(--primary);">
+                    <i class="fas fa-video"></i> Análisis en Tiempo Real
+                </h4>
+                <div class="media-container">
+                    <video id="videoElement" autoplay muted playsinline></video>
+                </div>
+                <div style="text-align: center; margin: 1rem 0;">
+                    <button class="btn btn-secondary" onclick="stopCamera()">
+                        <i class="fas fa-stop"></i> Detener Cámara
+                    </button>
+                    <button class="btn btn-secondary" onclick="captureSnapshot()" style="margin-left: 1rem;">
+                        <i class="fas fa-camera"></i> Capturar Foto
+                    </button>
+                </div>
+            </div>
+
+            <!-- Área de subida de archivos -->
+            <div id="uploadSection" class="hidden">
+                <h4 style="text-align: center; margin-bottom: 1rem; color: var(--primary);">
+                    <i class="fas fa-upload"></i> Subir Archivo
+                </h4>
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h4>Arrastra tu archivo aquí o haz clic para seleccionar</h4>
+                    <p style="margin-top: 0.5rem; opacity: 0.7;">
+                        Formatos soportados: JPG, PNG, MP4, AVI, MOV (máx. 50MB)
+                    </p>
+                </div>
+                <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;" onchange="handleFileSelect(this)">
+                
+                <!-- Preview del archivo -->
+                <div class="media-container" id="mediaPreview" style="display: none; margin-top: 2rem;">
+                    <img id="imagePreview" style="display: none;">
+                    <video id="videoPreview" controls style="display: none;"></video>
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-primary" id="analyzeBtn" onclick="analyzeFile()" style="display: none;">
+                        <i class="fas fa-brain"></i> Analizar Emociones
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resultados del análisis -->
+            <div class="results-container" id="resultsContainer">
+                <h4 style="text-align: center; margin-bottom: 2rem; color: var(--gold);">
+                    <i class="fas fa-chart-bar"></i> Resultados del Análisis
+                </h4>
+                
+                <div id="analysisResults">
+                    <!-- Los resultados se insertarán aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección About -->
+    <section class="about-section">
+        <h3 class="about-title">Sobre Nosotros</h3>
+        <p style="text-align: center; font-size: 1.2rem; opacity: 0.9; margin-bottom: 2rem;">
+            Somos un equipo especializado en Inteligencia Artificial y bienestar animal, 
+            dedicados a crear tecnología que mejore la relación entre las personas y sus mascotas.
+        </p>
+
+        <div class="about-content">
+            <div class="about-card">
+                <i class="fas fa-brain" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                <h3>IA Avanzada</h3>
+                <p>Utilizamos modelos de deep learning entrenados específicamente para reconocer emociones caninas con alta precisión.</p>
+            </div>
+
+            <div class="about-card">
+                <i class="fas fa-heart" style="font-size: 3rem; color: var(--secondary); margin-bottom: 1rem;"></i>
+                <h3>Bienestar Animal</h3>
+                <p>Nuestro objetivo es ayudar a los dueños a entender mejor a sus mascotas y mejorar su calidad de vida.</p>
+            </div>
+
+            <div class="about-card">
+                <i class="fas fa-mobile-alt" style="font-size: 3rem; color: var(--gold); margin-bottom: 1rem;"></i>
+                <h3>Tecnología Accesible</h3>
+                <p>Hacemos que la tecnología avanzada sea fácil de usar para cualquier persona con una mascota.</p>
+            </div>
+        </div>
+
+        <div class="team-section">
+            <h4 class="team-title">Equipo de Desarrollo</h4>
+            <div class="team-members">
+                <div class="team-member">
+                    <i class="fas fa-user-tie" style="font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem;"></i>
+                    <h5>Desarrollador IA</h5>
+                    <p style="opacity: 0.8;">Especialista en Machine Learning</p>
+                </div>
+                <div class="team-member">
+                    <i class="fas fa-code" style="font-size: 2rem; color: var(--accent); margin-bottom: 0.5rem;"></i>
+                    <h5>Desarrollador Full Stack</h5>
+                    <p style="opacity: 0.8;">Experto en desarrollo web</p>
+                </div>
+                <div class="team-member">
+                    <i class="fas fa-paw" style="font-size: 2rem; color: var(--gold); margin-bottom: 0.5rem;"></i>
+                    <h5>Veterinario Consultor</h5>
+                    <p style="opacity: 0.8;">Especialista en comportamiento animal</p>
+                </div>
+                <div class="team-member">
+                    <i class="fas fa-chart-line" style="font-size: 2rem; color: var(--secondary); margin-bottom: 0.5rem;"></i>
+                    <h5>Analista de Datos</h5>
+                    <p style="opacity: 0.8;">Experto en análisis de comportamiento</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem; padding: 1.5rem; background: rgba(255, 255, 255, 0.03); border-radius: 10px;">
+                <h5 style="color: var(--primary); margin-bottom: 1rem;">Contacto</h5>
+                <p><i class="fas fa-envelope"></i> info@dogemotionai.com</p>
+                <p style="margin-top: 0.5rem;"><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Telegram (oculta inicialmente) -->
+    <section class="telegram-section" id="telegramSection">
+        <i class="fab fa-telegram telegram-icon"></i>
+        <h3 style="color: #0088cc; margin-bottom: 1rem;">¡Felicidades! 🎉</h3>
+        <h4 style="margin-bottom: 1rem;">Has desbloqueado todas nuestras características</h4>
+        <p style="margin-bottom: 2rem; font-size: 1.1rem;">
+            Tienes acceso ilimitado a nuestro Bot de Telegram personalizado para análisis individual 
+            de tus mascotas por tiempo ilimitado.
+        </p>
+        
+        <div style="background: rgba(0, 136, 204, 0.1); border-radius: 15px; padding: 2rem; margin: 2rem 0;">
+            <h5 style="color: var(--primary); margin-bottom: 1rem;">Cómo usar el Bot de Telegram:</h5>
+            <ol style="text-align: left; max-width: 400px; margin: 0 auto;">
+                <li style="margin-bottom: 0.5rem;">Escanea el código QR o haz clic en el enlace</li>
+                <li style="margin-bottom: 0.5rem;">Inicia conversación con <code>/start</code></li>
+                <li style="margin-bottom: 0.5rem;">Envía fotos o videos de tu mascota</li>
+                <li>¡Recibe análisis instantáneo!</li>
+            </ol>
+        </div>
+
+        <div id="telegramQR" style="margin: 2rem 0;">
+            <!-- QR Code se generará aquí -->
+        </div>
+
+        <button class="btn btn-primary" onclick="openTelegramBot()">
+            <i class="fab fa-telegram"></i> Abrir Bot de Telegram
+        </button>
+    </section>
+
+    <!-- Modal de pago -->
+    <div class="payment-modal" id="paymentModal">
+        <div class="payment-content">
+            <button class="close-modal" onclick="closePaymentModal()">&times;</button>
+            <h3 style="text-align: center; color: var(--primary); margin-bottom: 2rem;">
+                <i class="fas fa-crown"></i> Plan Premium - $5/mes
+            </h3>
+            <p style="text-align: center; margin-bottom: 2rem; opacity: 0.9;">
+                Desbloquea análisis ilimitado y acceso exclusivo a nuestro Bot de Telegram
+            </p>
+
+            <form id="paymentForm" onsubmit="processPayment(event)">
+                <div class="form-group">
+                    <label for="cardName">Nombre en la Tarjeta</label>
+                    <input type="text" id="cardName" placeholder="John Doe" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cardNumber">Número de Tarjeta</label>
+                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="expiryDate">Fecha de Expiración</label>
+                        <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cvv">CVV</label>
+                        <input type="text" id="cvv" placeholder="123" maxlength="3" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="payBtn">
+                    <i class="fas fa-credit-card"></i> Realizar Pago - $5.00
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 1rem; font-size: 0.9rem; opacity: 0.7;">
+                <i class="fas fa-lock"></i> Pago seguro y cifrado
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-info-circle"></i>
+        <span id="toastMessage">Mensaje del sistema</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script>
+        // Variables globales
+        let socket;
+        let remainingAnalyses = {{ remaining_analyses }};
+        let currentFile = null;
+        let cameraStream = null;
+        let isAnalyzing = false;
+
+        // Inicializar aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeParticles();
+            connectWebSocket();
+            setupEventListeners();
+            updateAnalysisCounter();
+        });
+
+        // WebSocket connection
+        function connectWebSocket() {
+            socket = io();
+            
+            socket.on('connect', function() {
+                showToast('Conectado al servidor', 'success');
+            });
+
+            socket.on('disconnect', function() {
+                showToast('Desconectado del servidor', 'error');
+            });
+
+            socket.on('frame_update', function(data) {
+                const img = document.getElementById('videoStream');
+                if (img) {
+                    img.src = 'data:image/jpeg;base64,' + data.frame;
+                }
+            });
+
+            socket.on('emotion_update', function(data) {
+                updateEmotionDisplay(data);
+            });
+
+            socket.on('detection_started', function(data) {
+                showToast('Detección iniciada', 'success');
+            });
+
+            socket.on('detection_stopped', function(data) {
+                showToast('Detección detenida', 'info');
+            });
+
+            socket.on('detection_error', function(data) {
+                showToast(data.message || 'Error en detección', 'error');
+                if (data.error === 'limit_reached') {
+                    showPaymentModal();
+                }
+            });
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Drag and drop para upload
+            const uploadArea = document.getElementById('uploadArea');
+            
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect({files: files});
+                }
+            });
+
+            // Formatear inputs de pago
+            document.getElementById('cardNumber').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                e.target.value = formattedValue;
+            });
+
+            document.getElementById('expiryDate').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                e.target.value = value;
+            });
+
+            document.getElementById('cvv').addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '');
+            });
+        }
+
+        // Iniciar análisis con cámara
+        function startCameraAnalysis() {
+            if (remainingAnalyses <= 0) {
+                showPaymentModal();
+                return;
+            }
+
+            document.getElementById('analysisArea').classList.add('active');
+            document.getElementById('cameraSection').classList.remove('hidden');
+            document.getElementById('uploadSection').classList.add('hidden');
+
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    cameraStream = stream;
+                    document.getElementById('videoElement').srcObject = stream;
+                    socket.emit('start_detection');
+                })
+                .catch(function(err) {
+                    showToast('Error accediendo a la cámara: ' + err.message, 'error');
+                });
+        }
+
+        // Mostrar área de subida
+        function showUploadArea() {
+            if (remainingAnalyses <= 0) {
+                showPaymentModal();
+                return;
+            }
+
+            document.getElementById('analysisArea').classList.add('active');
+            document.getElementById('uploadSection').classList.remove('hidden');
+            document.getElementById('cameraSection').classList.add('hidden');
+        }
+
+        // Detener cámara
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            socket.emit('stop_detection');
+            document.getElementById('analysisArea').classList.remove('active');
+        }
+
+        // Capturar snapshot
+        function captureSnapshot() {
+            const video = document.getElementById('videoElement');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `dog_emotion_${Date.now()}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+            
+            showToast('Foto capturada', 'success');
+        }
+
+        // Manejar selección de archivo
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (file.size > 50 * 1024 * 1024) { // 50MB
+                showToast('El archivo es demasiado grande. Máximo 50MB.', 'error');
+                return;
+            }
+
+            currentFile = file;
+            const preview = document.getElementById('mediaPreview');
+            const imagePreview = document.getElementById('imagePreview');
+            const videoPreview = document.getElementById('videoPreview');
+
+            if (file.type.startsWith('image/')) {
+                imagePreview.src = URL.createObjectURL(file);
+                imagePreview.style.display = 'block';
+                videoPreview.style.display = 'none';
+            } else if (file.type.startsWith('video/')) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                imagePreview.style.display = 'none';
+            }
+
+            preview.style.display = 'block';
+            document.getElementById('analyzeBtn').style.display = 'inline-block';
+        }
+
+        // Analizar archivo
+        function analyzeFile() {
+            if (!currentFile || isAnalyzing) return;
+
+            if (remainingAnalyses <= 0) {
+                showPaymentModal();
+                return;
+            }
+
+            isAnalyzing = true;
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            analyzeBtn.innerHTML = '<div class="loading"></div> Analizando...';
+            analyzeBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', currentFile);
+
+            fetch('/api/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayResults(data);
+                    remainingAnalyses = data.remaining;
+                    updateAnalysisCounter();
+                    
+                    if (remainingAnalyses <= 0) {
+                        setTimeout(() => showPaymentModal(), 2000);
+                    }
+                } else {
+                    if (data.error === 'limit_reached') {
+                        showPaymentModal();
+                    } else {
+                        showToast(data.message || 'Error en el análisis', 'error');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error procesando archivo', 'error');
+            })
+            .finally(() => {
+                isAnalyzing = false;
+                analyzeBtn.innerHTML = '<i class="fas fa-brain"></i> Analizar Emociones';
+                analyzeBtn.disabled = false;
+            });
+        }
+
+        // Mostrar resultados del análisis
+        function displayResults(data) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const analysisResults = document.getElementById('analysisResults');
+
+            let resultsHTML = '';
+
+            if (data.type === 'image') {
+                resultsHTML = `
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <img src="data:image/jpeg;base64,${data.image}" 
+                             style="max-width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                    </div>
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <h5 style="color: var(--gold); font-size: 2rem; margin-bottom: 0.5rem;">
+                            ${getEmotionIcon(data.emotion)} ${data.emotion.toUpperCase()}
+                        </h5>
+                        <p style="font-size: 1.2rem; opacity: 0.9;">
+                            Confianza: ${(data.probability * 100).toFixed(1)}%
+                        </p>
+                        <p style="opacity: 0.7;">
+                            Perros detectados: ${data.dogs_detected}
+                        </p>
+                    </div>
+                `;
+            } else if (data.type === 'video') {
+                resultsHTML = `
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <h5 style="color: var(--gold); font-size: 2rem; margin-bottom: 0.5rem;">
+                            ${getEmotionIcon(data.dominant_emotion)} ${data.dominant_emotion.toUpperCase()}
+                        </h5>
+                        <p style="font-size: 1.2rem; opacity: 0.9;">
+                            Emoción dominante (${(data.average_confidence * 100).toFixed(1)}% confianza)
+                        </p>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 10px; text-align: center;">
+                            <strong>Frames analizados</strong><br>
+                            ${data.frames_analyzed} / ${data.total_frames}
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 10px; text-align: center;">
+                            <strong>Frames con perros</strong><br>
+                            ${data.frames_with_dogs}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Agregar barras de emociones
+            resultsHTML += `
+                <div class="emotion-bars">
+                    <div class="emotion-bar">
+                        <span class="emotion-icon">😊</span>
+                        <span class="emotion-label">Feliz</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: ${(data.predictions?.happy || 0) * 100}%"></div>
+                        </div>
+                        <span class="bar-percentage">${((data.predictions?.happy || 0) * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="emotion-bar">
+                        <span class="emotion-icon">😢</span>
+                        <span class="emotion-label">Triste</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: ${(data.predictions?.sad || 0) * 100}%"></div>
+                        </div>
+                        <span class="bar-percentage">${((data.predictions?.sad || 0) * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="emotion-bar">
+                        <span class="emotion-icon">😡</span>
+                        <span class="emotion-label">Enojado</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: ${(data.predictions?.angry || 0) * 100}%"></div>
+                        </div>
+                        <span class="bar-percentage">${((data.predictions?.angry || 0) * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="emotion-bar">
+                        <span class="emotion-icon">😌</span>
+                        <span class="emotion-label">Relajado</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: ${(data.predictions?.relaxed || 0) * 100}%"></div>
+                        </div>
+                        <span class="bar-percentage">${((data.predictions?.relaxed || 0) * 100).toFixed(1)}%</span>
+                    </div>
+                </div>
+            `;
+
+            analysisResults.innerHTML = resultsHTML;
+            resultsContainer.classList.add('show');
+            
+            // Scroll suave a los resultados
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Actualizar display de emociones en tiempo real
+        function updateEmotionDisplay(data) {
+            // Esta función se llamará para actualizaciones en tiempo real de la cámara
+            displayResults({
+                type: 'image',
+                emotion: data.emotion,
+                probability: data.probability,
+                predictions: {
+                    happy: data.happy,
+                    sad: data.sad,
+                    angry: data.angry,
+                    relaxed: data.relaxed
+                },
+                dogs_detected: 1
+            });
+        }
+
+        // Obtener icono de emoción
+        function getEmotionIcon(emotion) {
+            const icons = {
+                'happy': '😊',
+                'sad': '😢',
+                'angry': '😡',
+                'relaxed': '😌'
+            };
+            return icons[emotion] || '🐕';
+        }
+
+        // Actualizar contador de análisis
+        function updateAnalysisCounter() {
+            const counter = document.getElementById('analysisCounter');
+            const counterText = document.getElementById('counterText');
+            
+            if (remainingAnalyses <= 0) {
+                counter.classList.add('limit-reached');
+                counterText.classList.add('limit-reached');
+                counterText.textContent = 'Has alcanzado el límite de análisis gratuitos';
+                
+                // Deshabilitar opciones
+                document.getElementById('cameraOption').classList.add('disabled');
+                document.getElementById('uploadOption').classList.add('disabled');
+            } else {
+                counterText.textContent = `Te quedan ${remainingAnalyses} análisis gratuitos`;
+            }
+        }
+
+        // Mostrar modal de pago
+        function showPaymentModal() {
+            document.getElementById('paymentModal').classList.add('show');
+        }
+
+        // Cerrar modal de pago
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('show');
+        }
+
+        // Procesar pago
+        function processPayment(e) {
+            e.preventDefault();
+            
+            const payBtn = document.getElementById('payBtn');
+            payBtn.innerHTML = '<div class="loading"></div> Procesando...';
+            payBtn.disabled = true;
+
+            const formData = {
+                cardName: document.getElementById('cardName').value,
+                cardNumber: document.getElementById('cardNumber').value,
+                expiryDate: document.getElementById('expiryDate').value,
+                cvv: document.getElementById('cvv').value
+            };
+
+            fetch('/api/payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closePaymentModal();
+                    showToast('¡Pago procesado exitosamente!', 'success');
+                    
+                    // Resetear análisis
+                    remainingAnalyses = 999; // Ilimitado
+                    updateAnalysisCounter();
+                    
+                    // Habilitar opciones
+                    document.getElementById('cameraOption').classList.remove('disabled');
+                    document.getElementById('uploadOption').classList.remove('disabled');
+                    
+                    // Mostrar acceso a Telegram
+                    setTimeout(() => {
+                        showTelegramAccess();
+                    }, 1000);
+                } else {
+                    showToast(data.error || 'Error procesando pago', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error procesando pago', 'error');
+            })
+            .finally(() => {
+                payBtn.innerHTML = '<i class="fas fa-credit-card"></i> Realizar Pago - $5.00';
+                payBtn.disabled = false;
+            });
+        }
+
+        // Mostrar acceso a Telegram
+        function showTelegramAccess() {
+            const telegramSection = document.getElementById('telegramSection');
+            telegramSection.classList.add('show');
+            telegramSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Generar QR simulado
+            fetch('/api/telegram-access', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('telegramQR').innerHTML = `
+                            <div style="background: white; padding: 2rem; border-radius: 15px; display: inline-block;">
+                                <div style="width: 200px; height: 200px; background: #000; color: white; 
+                                           display: flex; align-items: center; justify-content: center; 
+                                           font-size: 1.5rem; text-align: center;">
+                                    QR CODE<br>
+                                    <small style="font-size: 0.8rem;">Escanea para acceder</small>
+                                </div>
+                            </div>
+                            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                                O haz clic en el botón de abajo
+                            </p>
+                        `;
+                        
+                        // Guardar URL para el botón
+                        window.telegramURL = data.telegram_url;
+                    }
+                });
+        }
+
+        // Abrir bot de Telegram
+        function openTelegramBot() {
+            if (window.telegramURL) {
+                window.open(window.telegramURL, '_blank');
+            } else {
+                showToast('Generando enlace...', 'info');
+            }
+        }
+
+        // Mostrar toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.className = `toast ${type} show`;
+            toastMessage.textContent = message;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // Sistema de partículas
+        function initializeParticles() {
+            const canvas = document.getElementById('particles-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const particleCount = 50;
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = (Math.random() - 0.5) * 2;
+                    this.speedY = (Math.random() - 0.5) * 2;
+                    this.opacity = Math.random() * 0.8 + 0.2;
+                    this.hue = Math.random() * 60 + 180;
+                }
+
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+
+                    if (this.x > canvas.width || this.x < 0) {
+                        this.speedX *= -1;
+                    }
+                    if (this.y > canvas.height || this.y < 0) {
+                        this.speedY *= -1;
+                    }
+                }
+
+                draw() {
+                    ctx.globalAlpha = this.opacity;
+                    ctx.fillStyle = `hsl(${this.hue}, 80%, 50%)`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                particles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+    </script>
+</body>
+</html>
