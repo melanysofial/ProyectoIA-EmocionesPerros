@@ -1,0 +1,23 @@
+@import url("https://fonts.googleapis.com/css?family=Ropa+Sans");
+
+.p-summary {
+  position: absolute;
+  top: 5%; left: 5%;
+  z-index: 2;
+  font-family: 'Ropa Sans';
+  h1 {
+    font-weight: 400;
+    letter-spacing: 0.2em;
+  }
+  p {
+    letter-spacing: 0.2em;
+  }
+  a {
+    color: #333;
+  }
+}
+.p-canvas-webgl {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  z-index: 1;
+}
