@@ -242,6 +242,7 @@ def process_video(video_path, output_path=None, show_video=True, save_video=Fals
         'dog_detection_rate': (dogs_detected_frames / frame_count * 100) if frame_count > 0 else 0,
         'emotions_detected': len(emotion_history),
         'emotion_stats': emotion_stats,
+        'emotion_distribution': emotion_stats,  # Alias para compatibilidad
         'processing_time': processing_time,
         'fps_processed': frame_count / processing_time if processing_time > 0 else 0
     }
@@ -266,102 +267,22 @@ def process_video(video_path, output_path=None, show_video=True, save_video=Fals
         dominant_emotion = max(emotion_stats.items(), key=lambda x: x[1])
         logger.info(f"\n🎯 Emoción dominante: {dominant_emotion[0].upper()} ({dominant_emotion[1]} ocurrencias)")
         
-        # Enviar resumen por Telegram
-        try:
-            from utils.telegram_utils import TelegramBot
-            
-            # Crear bot temporal para el resumen
-            bot = TelegramBot(
-                token="7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U", 
-                chat_id="1673887715"
-            )
-            
-            # Preparar mensaje de resumen
-            video_name = os.path.basename(video_path)
-            avg_confidence = stats['emotions_detected'] / stats['dogs_detected_frames'] if stats['dogs_detected_frames'] > 0 else 0
-            
-            resumen_mensaje = f"""🎬 **ANÁLISIS DE VIDEO COMPLETADO**
-
-📁 **Video:** {video_name}
-🔍 **Detecciones totales:** {stats['emotions_detected']}
-
-🎯 **Emoción dominante:** {dominant_emotion[0].upper()}
-
-📊 **Distribución:**"""
-            
-            # Agregar distribución de emociones con emojis
-            emotion_emojis = {
-                'happy': '😊',
-                'relaxed': '😌', 
-                'sad': '😢',
-                'angry': '😠'
-            }
-            
-            for emotion, count in emotion_stats.items():
-                if count > 0:
-                    percentage = (count / total_emotions) * 100
-                    emoji = emotion_emojis.get(emotion, '🐕')
-                    resumen_mensaje += f"\n{emoji} **{emotion.upper()}:** {count} ({percentage:.0f}%)"
-            
-            # Calcular confianza promedio estimada
-            confidence_avg = 0.75 + (stats['dog_detection_rate'] / 100) * 0.15
-            
-            resumen_mensaje += f"\n\n📈 **Confianza promedio:** {confidence_avg:.2f}"
-            resumen_mensaje += f"\n⏱️ **Frames procesados:** {stats['total_frames']}"
-            resumen_mensaje += f"\n🐕 **Detección de perros:** {stats['dog_detection_rate']:.1f}%"
-            resumen_mensaje += f"\n⚡ **Velocidad:** {stats['fps_processed']:.1f} FPS"
-            
-            # Agregar recomendaciones basadas en la emoción dominante
-            recommendations = {
-                'happy': "¡Tu perro se ve muy feliz! 🎉 Continúa con las actividades que lo hacen sentir bien.",
-                'relaxed': "Tu perro está en un estado ideal de relajación. 😌 Mantén el ambiente tranquilo.",
-                'sad': "Tu perro mostró signos de tristeza. 💙 Considera darle más atención y verificar su bienestar.",
-                'angry': "Se detectó estrés o molestia. ❤️ Revisa qué podría estar causando esta reacción."
-            }
-            
-            recommendation = recommendations.get(dominant_emotion[0], "Continúa monitoreando el bienestar de tu mascota.")
-            resumen_mensaje += f"\n\n💡 **Recomendación:**\n{recommendation}"
-            
-            # Agregar información del archivo si se guardó
-            if save_video and output_path:
-                resumen_mensaje += f"\n\n💾 **Video guardado:** {os.path.basename(output_path)}"
-            
-            # Enviar mensaje
-            bot.send_simple_message(resumen_mensaje)
-            logger.info("📱 Resumen enviado por Telegram exitosamente")
-            
-        except Exception as telegram_error:
-            logger.warning(f"⚠️ No se pudo enviar resumen por Telegram: {telegram_error}")
-            logger.debug(f"Detalles del error: {str(telegram_error)}")
+        # Agregar información completa al stats para uso externo
+        stats['emotion_history'] = emotion_history
+        stats['dominant_emotion'] = dominant_emotion[0]
+        stats['video_name'] = os.path.basename(video_path)
+        stats['confidence_avg'] = 0.75 + (stats['dog_detection_rate'] / 100) * 0.15
+        stats['output_file'] = output_path if save_video else None
     
     else:
         logger.info("\n⚠️ No se detectaron emociones en el video")
         
-        # Enviar mensaje de "sin detecciones" por Telegram
-        try:
-            from utils.telegram_utils import TelegramBot
-            
-            bot = TelegramBot(
-                token="7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U", 
-                chat_id="1673887715"
-            )
-            
-            video_name = os.path.basename(video_path)
-            mensaje_sin_detecciones = f"""🎬 **ANÁLISIS DE VIDEO COMPLETADO**
-
-📁 **Video:** {video_name}
-🔍 **Resultado:** No se detectaron perros en el video
-
-⏱️ **Frames procesados:** {stats['total_frames']}
-⚡ **Velocidad:** {stats['fps_processed']:.1f} FPS
-
-💡 **Sugerencia:** Asegúrate de que el video contenga perros claramente visibles."""
-            
-            bot.send_simple_message(mensaje_sin_detecciones)
-            logger.info("📱 Notificación enviada por Telegram")
-            
-        except Exception as telegram_error:
-            logger.warning(f"⚠️ No se pudo enviar notificación por Telegram: {telegram_error}")
+        # Agregar información para casos sin detecciones
+        stats['emotion_history'] = []
+        stats['dominant_emotion'] = 'no_detected'
+        stats['video_name'] = os.path.basename(video_path)
+        stats['confidence_avg'] = 0.0
+        stats['output_file'] = output_path if save_video else None
     
     if save_video and output_path:
         logger.info(f"\n💾 Video guardado en: {output_path}")

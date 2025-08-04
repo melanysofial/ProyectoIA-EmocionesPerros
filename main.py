@@ -341,50 +341,97 @@ def main():
     logger.info("🚀 Iniciando Dog Emotion Monitor con YOLOv8")
     logger.info("=" * 50)
     
-    # NUEVA FUNCIONALIDAD: Elegir entre cámara o video
-    print("\n🎯 MODO DE FUNCIONAMIENTO:")
-    print("1. 📹 Cámara en tiempo real")
-    print("2. 🎬 Procesar archivo de video")
-    
+    # INICIALIZAR BOT DE TELEGRAM PRIMERO
     try:
-        choice = input("\nSelecciona una opción (1 o 2): ").strip()
+        logger.info("📱 Inicializando bot de Telegram...")
+        bot = TelegramBot(
+            token="7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U", 
+            chat_id="1673887715"
+        )
+        logger.info("✅ Bot de Telegram iniciado")
         
-        if choice == "2":
-            # Modo procesamiento de video
-            video_path = input("📁 Ingresa la ruta del video: ").strip().replace('"', '')
-            
-            # Preguntar si quiere guardar el resultado
-            save_choice = input("💾 ¿Guardar video procesado? (s/n): ").strip().lower()
-            save_output = save_choice in ['s', 'si', 'yes', 'y']
-            
-            output_path = None
-            if save_output:
-                output_path = input("📁 Ruta para guardar (Enter para automático): ").strip().replace('"', '')
-                if not output_path:
-                    # Generar nombre automático
-                    base_name = os.path.splitext(os.path.basename(video_path))[0]
-                    output_path = f"{base_name}_procesado.mp4"
-            
-            logger.info(f"🎬 Modo video seleccionado: {video_path}")
-            result = process_video_file(video_path, save_output, output_path)
-            
-            if result:
-                logger.info("✅ Video procesado exitosamente")
-            else:
-                logger.error("❌ Error procesando video")
-            
-            return
-            
-        elif choice != "1":
-            logger.warning("⚠️ Opción no válida, usando cámara por defecto")
-    
-    except KeyboardInterrupt:
-        logger.info("👋 Saliendo...")
-        return
+        # Enviar mensaje de bienvenida
+        bot.send_simple_message(
+            "🚀 **Dog Emotion Monitor Iniciado**\n\n"
+            "✅ Sistema listo para análisis\n"
+            "📱 Usa /menu para ver todas las opciones\n\n"
+            "🎯 **Opciones disponibles:**\n"
+            "• 📹 Análisis en tiempo real\n"
+            "• 🎬 Analizar videos\n"
+            "• 📊 Monitoreo automático\n\n"
+            "💡 ¡Envía un video o usa el análisis en tiempo real!"
+        )
+        telegram_enabled = True
+        
     except Exception as e:
-        logger.warning(f"⚠️ Error en selección: {e}, usando cámara por defecto")
+        logger.error(f"❌ Error inicializando Telegram: {e}")
+        logger.warning("⚠️ Continuando sin Telegram...")
+        telegram_enabled = False
+        bot = None
     
-    # MODO CÁMARA ORIGINAL (por defecto)
+    # NUEVA FUNCIONALIDAD: Elegir entre consola o solo bot
+    if telegram_enabled:
+        print("\n🎯 MODO DE FUNCIONAMIENTO:")
+        print("1. � Solo bot de Telegram (recomendado)")
+        print("2. �📹 Cámara en tiempo real desde consola")
+        print("3. 🎬 Procesar archivo de video desde consola")
+        
+        try:
+            choice = input("\nSelecciona una opción (1, 2 o 3): ").strip()
+            
+            if choice == "1":
+                # Modo solo bot de Telegram
+                logger.info("� Modo bot de Telegram activado")
+                logger.info("💡 Usa /menu en Telegram para acceder a todas las funciones")
+                logger.info("🎬 Puedes enviar videos directamente al bot")
+                logger.info("📹 O usar el análisis en tiempo real desde el menú")
+                
+                print("\n" + "="*60)
+                print("🤖 BOT DE TELEGRAM ACTIVO")
+                print("="*60)
+                print("� Ve a Telegram y usa /menu para ver las opciones")
+                print("🎬 Puedes enviar videos directamente")
+                print("📹 O iniciar análisis en tiempo real")
+                print("⚠️  Presiona Ctrl+C para salir")
+                print("="*60)
+                
+                # Mantener el programa activo
+                try:
+                    while True:
+                        time.sleep(1)
+                except KeyboardInterrupt:
+                    logger.info("👋 Cerrando programa...")
+                    if bot:
+                        bot.cleanup()
+                    return
+            
+            elif choice == "2":
+                # Modo cámara desde consola (funcionalidad original)
+                return main_camera_mode(bot)
+            
+            elif choice == "3":
+                # Modo video desde consola (funcionalidad original)
+                return main_video_mode(bot)
+            
+            else:
+                logger.warning("⚠️ Opción no válida, activando modo bot")
+                choice = "1"
+        
+        except KeyboardInterrupt:
+            logger.info("👋 Saliendo...")
+            if bot:
+                bot.cleanup()
+            return
+        except Exception as e:
+            logger.warning(f"⚠️ Error en selección: {e}, activando modo bot")
+            choice = "1"
+    
+    else:
+        # Sin Telegram, usar modo consola tradicional
+        return main_console_mode()
+
+def main_camera_mode(bot=None):
+    """Modo cámara en tiempo real (funcionalidad original)"""
     logger.info("📹 Modo cámara en tiempo real seleccionado")
     
     # Inicializar componentes
@@ -398,37 +445,77 @@ def main():
     
     try:
         logger.info("🐕 Inicializando detector YOLO optimizado...")
-        yolo_detector = YoloDogDetector(confidence_threshold=0.60)  # 60% balanceado
+        yolo_detector = YoloDogDetector(confidence_threshold=0.60)
         logger.info("✅ YOLOv8 cargado exitosamente (umbral: 60%)")
     except Exception as e:
         logger.error(f"❌ Error cargando YOLO: {e}")
         return
-    
-    try:
-        logger.info("📱 Inicializando bot de Telegram interactivo...")
-        bot = TelegramBot(
-            token="7668982184:AAEXrM7xx0bDKidNOhyi6xjSNYUNRpvu61U", 
-            chat_id="1673887715"
-        )
-        logger.info("✅ Bot de Telegram creado")
-        
-        # Enviar mensaje de bienvenida directamente (el bot ya está funcionando)
-        logger.info("📨 Enviando mensaje de bienvenida...")
-        bot.send_welcome_message()
-        telegram_enabled = True
-        logger.info("✅ Telegram habilitado - Monitoreo activado por defecto")
-            
-    except Exception as e:
-        logger.warning(f"⚠️ Telegram no disponible: {e}")
-        logger.warning(f"⚠️ Tipo de error: {type(e).__name__}")
-        telegram_enabled = False
-        bot = None
     
     # Buscar cámara
     camera_index = find_available_camera()
     if camera_index is None:
         logger.error("❌ No se encontró ninguna cámara")
         return
+    
+    # Resto de la funcionalidad original de cámara...
+    return run_camera_analysis(detector, yolo_detector, bot, camera_index)
+
+def main_video_mode(bot=None):
+    """Modo procesamiento de video desde consola"""
+    video_path = input("📁 Ingresa la ruta del video: ").strip().replace('"', '')
+    
+    # Preguntar si quiere guardar el resultado
+    save_choice = input("💾 ¿Guardar video procesado? (s/n): ").strip().lower()
+    save_output = save_choice in ['s', 'si', 'yes', 'y']
+    
+    output_path = None
+    if save_output:
+        output_path = input("📁 Ruta para guardar (Enter para automático): ").strip().replace('"', '')
+        if not output_path:
+            # Generar nombre automático
+            base_name = os.path.splitext(os.path.basename(video_path))[0]
+            output_path = f"{base_name}_procesado.mp4"
+    
+    logger.info(f"🎬 Modo video seleccionado: {video_path}")
+    result = process_video_file(video_path, save_output, output_path)
+    
+    if result:
+        logger.info("✅ Video procesado exitosamente")
+    else:
+        logger.error("❌ Error procesando video")
+
+def main_console_mode():
+    """Modo consola tradicional sin Telegram"""
+    print("\n🎯 MODO DE FUNCIONAMIENTO:")
+    print("1. 📹 Cámara en tiempo real")
+    print("2. 🎬 Procesar archivo de video")
+    
+    try:
+        choice = input("\nSelecciona una opción (1 o 2): ").strip()
+        
+        if choice == "2":
+            return main_video_mode()
+        else:
+            return main_camera_mode()
+            
+    except KeyboardInterrupt:
+        logger.info("👋 Saliendo...")
+        return
+
+def run_camera_analysis(detector, yolo_detector, bot, camera_index):
+    
+    # Inicializar cámara
+    cap = cv2.VideoCapture(camera_index)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    cap.set(cv2.CAP_PROP_FPS, 30)
+    
+    # Resto de la funcionalidad original de cámara...
+    return run_camera_analysis(detector, yolo_detector, bot, camera_index)
+
+def run_camera_analysis(detector, yolo_detector, bot, camera_index):
+    """Ejecutar análisis de cámara en tiempo real"""
+    telegram_enabled = bot is not None
     
     # Inicializar cámara
     cap = cv2.VideoCapture(camera_index)
@@ -444,12 +531,13 @@ def main():
     
     logger.info("\n🎮 CONTROLES:")
     logger.info("  Q o ESC: Salir")
-    logger.info("  S: Enviar mensaje de prueba por Telegram")
-    logger.info("  M: Recordatorio del menú de Telegram")
-    logger.info("  C: Limpiar chat de Telegram")
-    logger.info("\n📱 TELEGRAM:")
-    logger.info("  Usa /menu en el chat para acceder a todas las funciones")
-    logger.info("  Activa el monitoreo desde el menú para recibir alertas")
+    if telegram_enabled:
+        logger.info("  S: Enviar mensaje de prueba por Telegram")
+        logger.info("  M: Recordatorio del menú de Telegram")
+        logger.info("  C: Limpiar chat de Telegram")
+        logger.info("\n📱 TELEGRAM:")
+        logger.info("  Usa /menu en el chat para acceder a todas las funciones")
+        logger.info("  Activa el monitoreo desde el menú para recibir alertas")
     logger.info("\n▶️ Iniciando detección...\n")
     
     try:
@@ -470,7 +558,6 @@ def main():
             frame = yolo_detector.draw_detections(frame, dog_detections)
             
             # PASO 3: Solo analizar emociones SI hay perros detectados
-            # Removemos el análisis continuo para evitar spam de logs
             if dogs_detected and current_time - last_analysis_time >= cooldown_time:
                 try:
                     logger.info(f"🐕 Analizando emociones... (perro detectado)")
@@ -569,8 +656,14 @@ def main():
                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
             cv2.putText(frame, f'Historial emocional: {len(emotion_history)}/4', (10, info_y + 40), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
-            cv2.putText(frame, 'Q: salir | S: test | M: menu | C: limpiar', (10, info_y + 60), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+            
+            # Ajustar controles según Telegram
+            if telegram_enabled:
+                cv2.putText(frame, 'Q: salir | S: test | M: menu | C: limpiar', (10, info_y + 60), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+            else:
+                cv2.putText(frame, 'Q: salir', (10, info_y + 60), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
 
             cv2.imshow('🐕 Dog Emotion Monitor + YOLOv8', frame)
 
