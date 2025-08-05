@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poly:ital@0;1&display=swap');
+@import url("https://fonts.googleapis.com/css?family=Ropa+Sans");
 
 :root{
 
@@ -130,15 +131,15 @@ hr{
 }
 
 .hero-section{
-    background-image: var(--hero-bg-img);
-    background-position: center; /* Center the image */
-    background-repeat: no-repeat; /* Do not repeat the image */
+    /* Background image removed to use GLSL canvas instead */
+    background-position: center;
+    background-repeat: no-repeat;
     background-size: cover;
 }
 
 .hero-bg-gradient{
-    /* background: linear-gradient(180deg, var(--hero-gradient) 13%, rgba(0,0,0,0.258140756302521) 87%); */
-    background: linear-gradient(180deg, var(--hero-gradient) 23%, rgba(0,0,0,0) 87%, var(--hero-gradient) 97%);
+    /* Background transparente para mostrar el efecto global */
+    background: transparent;
 }
 
 
@@ -405,4 +406,108 @@ hr{
         color: var(--he);
     } */
     
+}
+
+/* GLSL Hills Background Styles - Global */
+.p-canvas-webgl-global {
+    position: fixed;
+    top: 0; 
+    right: 0; 
+    bottom: 0; 
+    left: 0;
+    z-index: -1; /* Detrás de todo el contenido */
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Permitir que los clics pasen a través del canvas */
+    opacity: 1; /* Opacidad completa para máxima visibilidad */
+}
+
+/* Overlay suave REDUCIDO para mejorar la legibilidad del texto - modo claro */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, 
+        rgba(255, 255, 255, 0.02) 0%, 
+        rgba(255, 255, 255, 0.01) 50%, 
+        rgba(255, 255, 255, 0.02) 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Overlay REDUCIDO para modo oscuro */
+.tw-dark body::before {
+    background: linear-gradient(180deg, 
+        rgba(0, 0, 0, 0.05) 0%, 
+        rgba(0, 0, 0, 0.02) 50%, 
+        rgba(0, 0, 0, 0.05) 100%);
+}
+
+/* Asegurar que todo el contenido esté por encima del canvas */
+header, section, footer, main {
+    position: relative;
+    z-index: 10;
+}
+
+/* Mejorar contraste del texto en toda la página */
+h1, h2, h3, h4, h5, h6 {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tw-dark h1, .tw-dark h2, .tw-dark h3, .tw-dark h4, .tw-dark h5, .tw-dark h6 {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Mejorar legibilidad de texto general */
+p, span, div {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.tw-dark p, .tw-dark span, .tw-dark div {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos originales del canvas local (mantener para compatibilidad) */
+.p-canvas-webgl {
+    position: absolute;
+    top: 0; 
+    right: 0; 
+    bottom: 0; 
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+/* Asegurar que el contenido esté por encima del canvas y overlay */
+.hero-section .hero-bg-gradient {
+    position: relative;
+    z-index: 10;
+}
+
+.hero-section .hero-bg-gradient > * {
+    position: relative;
+    z-index: 15;
+}
+
+/* Mejorar contraste del texto en ambos modos */
+.hero-section h2 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tw-dark .hero-section h2 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-section .tw-text-gray-800 {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.tw-dark .hero-section .dark\:tw-text-white {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }

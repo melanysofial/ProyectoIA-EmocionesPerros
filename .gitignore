@@ -1,0 +1,12 @@
+# ===========================================
+# FEELIPET PROJECT - GITIGNORE
+# SOLO INCLUIR CARPETA LANDINGPAGE
+# ===========================================
+
+# Ignorar absolutamente todo
+*
+
+# Excepciones: Solo permitir estos archivos
+!.gitignore
+!LandingPage/
+!LandingPage/**
