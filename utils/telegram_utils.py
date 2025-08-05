@@ -12,6 +12,9 @@ import time
 import random
 import string
 import socket
+import tkinter as tk
+from tkinter import messagebox, ttk
+import webbrowser
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +120,207 @@ class TelegramBot:
         return code
     
     def _show_connection_code(self):
-        """Mostrar código de conexión en consola con formato mejorado"""
+        """Mostrar código de conexión en ventana emergente amigable"""
+        try:
+            # Crear ventana emergente
+            root = tk.Tk()
+            root.title("🔐 FeeliPetAI - Código de Conexión")
+            root.geometry("500x600")
+            root.resizable(False, False)
+            
+            # Configurar icono y estilo
+            root.configure(bg='#f0f0f0')
+            
+            # Centrar ventana en la pantalla
+            root.update_idletasks()
+            x = (root.winfo_screenwidth() // 2) - (500 // 2)
+            y = (root.winfo_screenheight() // 2) - (600 // 2)
+            root.geometry(f"500x600+{x}+{y}")
+            
+            # Frame principal con padding
+            main_frame = tk.Frame(root, bg='#f0f0f0', padx=20, pady=20)
+            main_frame.pack(fill=tk.BOTH, expand=True)
+            
+            # Título principal
+            title_label = tk.Label(
+                main_frame, 
+                text="🔐 CÓDIGO DE CONEXIÓN TELEGRAM",
+                font=("Arial", 16, "bold"),
+                bg='#f0f0f0',
+                fg='#2c3e50'
+            )
+            title_label.pack(pady=(0, 10))
+            
+            # Información de PC
+            pc_frame = tk.Frame(main_frame, bg='#e8f4f8', relief=tk.RAISED, bd=2)
+            pc_frame.pack(fill=tk.X, pady=(0, 15))
+            
+            pc_label = tk.Label(
+                pc_frame,
+                text=f"🖥️ PC: {self.pc_name}",
+                font=("Arial", 12, "bold"),
+                bg='#e8f4f8',
+                fg='#34495e'
+            )
+            pc_label.pack(pady=10)
+            
+            # Frame para el código (destacado)
+            code_frame = tk.Frame(main_frame, bg='#fff3cd', relief=tk.RAISED, bd=3)
+            code_frame.pack(fill=tk.X, pady=(0, 20))
+            
+            code_title = tk.Label(
+                code_frame,
+                text="🔑 TU CÓDIGO DE CONEXIÓN:",
+                font=("Arial", 11, "bold"),
+                bg='#fff3cd',
+                fg='#856404'
+            )
+            code_title.pack(pady=10)
+            
+            # Código en grande y seleccionable
+            code_var = tk.StringVar(value=self.connection_code)
+            code_entry = tk.Entry(
+                code_frame,
+                textvariable=code_var,
+                font=("Courier New", 18, "bold"),
+                justify=tk.CENTER,
+                state='readonly',
+                bg='#ffffff',
+                fg='#d63384',
+                relief=tk.SOLID,
+                bd=2,
+                width=20
+            )
+            code_entry.pack(pady=10)
+            
+            # Función para copiar código
+            def copy_code():
+                root.clipboard_clear()
+                root.clipboard_append(self.connection_code)
+                copy_btn.configure(text="✅ ¡Copiado!", bg='#28a745')
+                root.after(2000, lambda: copy_btn.configure(text="📋 Copiar Código", bg='#007bff'))
+            
+            # Botón copiar
+            copy_btn = tk.Button(
+                code_frame,
+                text="📋 Copiar Código",
+                font=("Arial", 10, "bold"),
+                bg='#007bff',
+                fg='white',
+                padx=20,
+                pady=5,
+                command=copy_code,
+                relief=tk.RAISED,
+                bd=2
+            )
+            copy_btn.pack(pady=10)
+            
+            # Instrucciones paso a paso
+            instructions_frame = tk.Frame(main_frame, bg='#f8f9fa', relief=tk.RAISED, bd=2)
+            instructions_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+            
+            instructions_title = tk.Label(
+                instructions_frame,
+                text="📋 INSTRUCCIONES:",
+                font=("Arial", 12, "bold"),
+                bg='#f8f9fa',
+                fg='#495057'
+            )
+            instructions_title.pack(pady=10)
+            
+            instructions = [
+                "1️⃣ Abre Telegram en tu teléfono",
+                "2️⃣ Busca el bot y envía /start",
+                "3️⃣ Copia y envía el código: " + self.connection_code,
+                "4️⃣ ¡Listo! Ya puedes controlar esta PC desde Telegram"
+            ]
+            
+            for instruction in instructions:
+                instr_label = tk.Label(
+                    instructions_frame,
+                    text=instruction,
+                    font=("Arial", 10),
+                    bg='#f8f9fa',
+                    fg='#6c757d',
+                    anchor='w'
+                )
+                instr_label.pack(fill=tk.X, padx=20, pady=2)
+            
+            # Separador
+            separator = tk.Frame(main_frame, height=2, bg='#dee2e6')
+            separator.pack(fill=tk.X, pady=10)
+            
+            # Información adicional
+            info_label = tk.Label(
+                main_frame,
+                text="💡 Este código es único para esta PC\n🔒 Solo compártelo con personas de confianza\n⚠️ Cada PC tiene su código único - Este permite que CUALQUIER PERSONA controle esta PC desde Telegram",
+                font=("Arial", 9),
+                bg='#f0f0f0',
+                fg='#6c757d',
+                justify=tk.CENTER
+            )
+            info_label.pack(pady=10)
+            
+            # Botones de acción
+            button_frame = tk.Frame(main_frame, bg='#f0f0f0')
+            button_frame.pack(fill=tk.X)
+            
+            def close_window():
+                root.destroy()
+            
+            def open_telegram():
+                try:
+                    webbrowser.open("https://telegram.org/")
+                except:
+                    pass
+            
+            # Botón cerrar
+            close_btn = tk.Button(
+                button_frame,
+                text="✅ Entendido",
+                font=("Arial", 11, "bold"),
+                bg='#28a745',
+                fg='white',
+                padx=30,
+                pady=8,
+                command=close_window,
+                relief=tk.RAISED,
+                bd=2
+            )
+            close_btn.pack(side=tk.RIGHT)
+            
+            # Botón abrir Telegram
+            telegram_btn = tk.Button(
+                button_frame,
+                text="📱 Abrir Telegram Web",
+                font=("Arial", 10),
+                bg='#0088cc',
+                fg='white',
+                padx=20,
+                pady=8,
+                command=open_telegram,
+                relief=tk.RAISED,
+                bd=2
+            )
+            telegram_btn.pack(side=tk.LEFT)
+            
+            # Seleccionar código automáticamente para fácil copia
+            code_entry.select_range(0, tk.END)
+            code_entry.focus()
+            
+            # Manejar cierre con X
+            root.protocol("WM_DELETE_WINDOW", close_window)
+            
+            # Mostrar ventana
+            root.mainloop()
+            
+        except Exception as e:
+            logger.error(f"Error mostrando ventana de código: {e}")
+            # Fallback a consola si falla la ventana
+            self._show_connection_code_console()
+    
+    def _show_connection_code_console(self):
+        """Mostrar código de conexión en consola (fallback)"""
         # Colores ANSI para terminal
         GREEN = '\033[92m'
         YELLOW = '\033[93m'
@@ -278,7 +481,7 @@ class TelegramBot:
             # Usuario no autorizado - solicitar código
             welcome_text = (
                 f"👋 **¡Hola {user_name}!**\n\n"
-                "🐕 **Bienvenido a Dog Emotion Monitor**\n"
+                "🐕 **Bienvenido a FeeliPetAI**\n"
                 "🔐 **Sistema de Acceso Seguro Activado**\n\n"
                 f"🖥️ **PC:** {self.pc_name}\n"
                 f"🔑 **Estado:** Pendiente de autorización\n\n"
@@ -317,7 +520,7 @@ class TelegramBot:
                 f"🎉 **¡Conexión exitosa, {user_name}!**\n\n"
                 f"✅ **Autorizado para PC:** {self.pc_name}\n"
                 f"🔑 **Código utilizado:** {self.connection_code}\n\n"
-                "🐕 **Monitor de Emociones Caninas** está ahora disponible.\n\n"
+                "🐕 **FeeliPetAI** está ahora disponible.\n\n"
                 "Usa /menu para comenzar a monitorear a tu mascota."
             )
             await update.message.reply_text(success_text, parse_mode='Markdown')
@@ -369,6 +572,7 @@ class TelegramBot:
             [InlineKeyboardButton("🔔 Activar Monitoreo", callback_data="monitor_on")],
             [InlineKeyboardButton("🔕 Pausar Monitoreo", callback_data="monitor_off")],
             [InlineKeyboardButton("💡 Consejos Generales", callback_data="tips")],
+            [InlineKeyboardButton("💎 Versión Premium", callback_data="premium_info")],
             [InlineKeyboardButton("🚪 Desconectar de PC", callback_data="disconnect_pc")],
             [InlineKeyboardButton("❓ Ayuda", callback_data="help")]
         ]
@@ -535,7 +739,7 @@ class TelegramBot:
                     "🔐 **Para reconectarte:**\n"
                     "1️⃣ Envía `/start`\n"
                     "2️⃣ Ingresa el código de conexión actual\n\n"
-                    "👋 ¡Gracias por usar Dog Emotion Monitor!",
+                    "👋 ¡Gracias por usar FeeliPetAI!",
                     parse_mode='Markdown'
                 )
                 
@@ -646,6 +850,90 @@ class TelegramBot:
             
         elif query.data == "capture_frame":
             await self._capture_current_frame(update, context)
+            
+        elif query.data == "premium_info":
+            premium_text = (
+                "💎 **VERSIÓN PREMIUM**\n\n"
+                "**🆓 PLAN BÁSICO (Actual):**\n"
+                "• ✅ Análisis de hasta 5 videos por día\n"
+                "• ✅ Consejos generales para perros\n"
+                "• ✅ Detección básica de emociones\n"
+                "• ❌ Sin análisis en tiempo real\n"
+                "• ❌ Sin alertas automáticas\n"
+                "• ❌ Sin reportes detallados\n"
+                "• ❌ Sin resúmenes diarios\n\n"
+                "**💎 PLAN PREMIUM ($3.00 USD):**\n"
+                "• ✅ Análisis ilimitado de videos\n"
+                "• ✅ Análisis en tiempo real por cámara\n"
+                "• ✅ Alertas automáticas inteligentes\n"
+                "• ✅ Reportes detallados y estadísticas\n"
+                "• ✅ Resúmenes diarios personalizados\n"
+                "• ✅ Consejos especializados por raza\n"
+                "• ✅ Historial completo de análisis\n"
+                "• ✅ Soporte prioritario\n\n"
+                "**🎯 BENEFICIOS PREMIUM:**\n"
+                "• Monitoreo 24/7 de tu mascota\n"
+                "• Detección temprana de problemas\n"
+                "• Análisis de patrones de comportamiento\n"
+                "• Recomendaciones veterinarias\n\n"
+                "💳 **Próximamente:** Sistema de pago integrado\n"
+                "📧 **Contacto:** Escríbenos para más información\n\n"
+                "¡Invierte $3 en el bienestar de tu mejor amigo! 🐕💖"
+            )
+            keyboard = [
+                [InlineKeyboardButton("📊 Ver mis límites actuales", callback_data="usage_stats")],
+                [InlineKeyboardButton("💳 Información de pago", callback_data="payment_info")],
+                [InlineKeyboardButton("🏠 Regresar al Menú", callback_data="show_menu")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.message.reply_text(premium_text, reply_markup=reply_markup, parse_mode='Markdown')
+            
+        elif query.data == "usage_stats":
+            # Aquí implementaremos el contador de videos analizados
+            stats_text = (
+                "📊 **ESTADÍSTICAS DE USO**\n\n"
+                "**📅 Hoy:**\n"
+                "• Videos analizados: 0/5 📹\n"
+                "• Plan actual: 🆓 Básico\n\n"
+                "**📈 Esta semana:**\n"
+                "• Total de análisis: 0\n"
+                "• Días activos: 0/7\n\n"
+                "**💡 Recomendación:**\n"
+                "Con el plan Premium tendrías análisis ilimitados\n"
+                "y funciones avanzadas como monitoreo en tiempo real.\n\n"
+                "¡Actualiza por solo $1 y desbloquea todo el potencial! 💎"
+            )
+            keyboard = [
+                [InlineKeyboardButton("💎 Ver Plan Premium", callback_data="premium_info")],
+                [InlineKeyboardButton("🏠 Regresar al Menú", callback_data="show_menu")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.message.reply_text(stats_text, reply_markup=reply_markup, parse_mode='Markdown')
+            
+        elif query.data == "payment_info":
+            payment_text = (
+                "💳 **INFORMACIÓN DE PAGO**\n\n"
+                "**💎 Plan Premium - $1.00 USD**\n\n"
+                "**🚧 PRÓXIMAMENTE:**\n"
+                "• Integración con PayPal\n"
+                "• Pago con tarjeta de crédito/débito\n"
+                "• Activación automática instantánea\n\n"
+                "**📧 POR AHORA:**\n"
+                "Si estás interesado en el plan Premium,\n"
+                "contáctanos y te daremos acceso anticipado:\n\n"
+                "• Email: [Agregar email de contacto]\n"
+                "• Telegram: [Agregar usuario admin]\n\n"
+                "**🎁 OFERTA ESPECIAL:**\n"
+                "Los primeros 100 usuarios obtendrán\n"
+                "1 mes gratis adicional! 🎉\n\n"
+                "¡No te pierdas esta oportunidad!"
+            )
+            keyboard = [
+                [InlineKeyboardButton("💎 Ver Beneficios Premium", callback_data="premium_info")],
+                [InlineKeyboardButton("🏠 Regresar al Menú", callback_data="show_menu")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.message.reply_text(payment_text, reply_markup=reply_markup, parse_mode='Markdown')
 
     async def _handle_realtime_analysis(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Manejar el análisis en tiempo real"""
@@ -1004,7 +1292,7 @@ class TelegramBot:
                     cv2.putText(frame, 'Q: salir | Telegram: control remoto', (10, info_y + 60), 
                                cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
 
-                    cv2.imshow('🐕 Dog Emotion Monitor + YOLOv8', frame)
+                    cv2.imshow('🐕 FeeliPetAI + YOLOv8', frame)
 
                     # Manejar teclas
                     key = cv2.waitKey(1) & 0xFF
