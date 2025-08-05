@@ -10,3 +10,5 @@
 !.gitignore
 !LandingPage/
 !LandingPage/**
+!LandingPage/
+!LandingPage/**
