@@ -350,16 +350,25 @@ def main():
         )
         logger.info("✅ Bot de Telegram iniciado")
         
-        # Enviar mensaje de bienvenida
+        # Mostrar código de conexión de forma prominente
+        print("\n" + "🎯" * 25 + " SISTEMA MULTIUSUARIO " + "🎯" * 25)
+        print("Este código permite que CUALQUIER PERSONA controle esta PC desde Telegram")
+        print("Solo compártelo con personas de CONFIANZA")
+        print("🎯" * 72 + "\n")
+        
+        # Enviar mensaje de bienvenida inicial (sin menú automático)
         bot.send_simple_message(
-            "🚀 **Dog Emotion Monitor Iniciado**\n\n"
-            "✅ Sistema listo para análisis\n"
-            "📱 Usa /menu para ver todas las opciones\n\n"
-            "🎯 **Opciones disponibles:**\n"
-            "• 📹 Análisis en tiempo real\n"
-            "• 🎬 Analizar videos\n"
-            "• 📊 Monitoreo automático\n\n"
-            "💡 ¡Envía un video o usa el análisis en tiempo real!"
+            "� **¡Bienvenido a Dog Emotion Monitor!**\n\n"
+            "🤖 **Servicio Iniciado Correctamente**\n"
+            "✅ Sistema listo para recibir conexiones\n\n"
+            "� **Para acceder a este sistema:**\n"
+            "1️⃣ Envía el comando `/start`\n"
+            "2️⃣ Ingresa el código de conexión de esta PC\n"
+            "3️⃣ ¡Disfruta del análisis de emociones caninas!\n\n"
+            "💡 **¿No tienes el código?**\n"
+            "Revisa la consola de la PC donde está ejecutándose el servicio.\n"
+            "El código se muestra con colores llamativos al iniciar.\n\n"
+            "� **Nota de Seguridad:** Solo comparte el código con personas de confianza."
         )
         telegram_enabled = True
         

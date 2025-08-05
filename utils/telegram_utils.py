@@ -9,6 +9,9 @@ from datetime import datetime
 import json
 import requests
 import time
+import random
+import string
+import socket
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +23,11 @@ class TelegramBot:
         
         if not self.token:
             raise ValueError("❌ Token de Telegram no proporcionado. Usa el parámetro 'token' o la variable de entorno 'TELEGRAM_BOT_TOKEN'")
+        
+        # Sistema de códigos de vinculación por PC
+        self.pc_name = socket.gethostname()  # Nombre de la PC - DEBE IR PRIMERO
+        self.connection_code = self._generate_connection_code()
+        self.authorized_users = set()  # Set de chat_ids autorizados
         
         self.application = None
         self.bot_thread = None
@@ -33,6 +41,8 @@ class TelegramBot:
         self.current_mode = "menu"    # Modo actual: "menu", "realtime", "video"
         self.realtime_stop_flag = False  # Flag para detener el análisis
         self.camera_capture = None    # Objeto de captura de cámara
+        self.current_frame = None     # Frame actual para captura remota
+        self.frame_lock = threading.Lock()  # Lock para acceso thread-safe al frame
         
         # Cola thread-safe para alertas
         import queue
@@ -92,6 +102,79 @@ class TelegramBot:
         
         # Inicializar bot con menú
         self._setup_bot()
+        
+        # Mostrar código de conexión al iniciar
+        self._show_connection_code()
+
+    def _generate_connection_code(self):
+        """Generar código único de conexión para esta PC"""
+        # Combinar nombre de PC + timestamp + aleatorio para unicidad
+        timestamp = str(int(time.time()))[-4:]  # Últimos 4 dígitos del timestamp
+        random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+        pc_part = self.pc_name[:4].upper() if len(self.pc_name) >= 4 else self.pc_name.upper().ljust(4, 'X')
+        
+        code = f"{pc_part}-{timestamp}-{random_part}"
+        return code
+    
+    def _show_connection_code(self):
+        """Mostrar código de conexión en consola con formato mejorado"""
+        # Colores ANSI para terminal
+        GREEN = '\033[92m'
+        YELLOW = '\033[93m'
+        RED = '\033[91m'
+        CYAN = '\033[96m'
+        MAGENTA = '\033[95m'
+        BOLD = '\033[1m'
+        UNDERLINE = '\033[4m'
+        RESET = '\033[0m'
+        
+        # Borde decorativo
+        border = "█" * 70
+        inner_border = "▓" * 68
+        
+        print(f"\n{RED}{border}{RESET}")
+        print(f"{RED}█{RESET}{YELLOW}{'':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{YELLOW}{BOLD}{'🔐 CÓDIGO DE CONEXIÓN PARA TELEGRAM':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{YELLOW}{'':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{CYAN}{inner_border}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{GREEN}{'':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{GREEN}{BOLD}{'📱 PC: ' + self.pc_name:^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{GREEN}{'':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{MAGENTA}{'▓' * 68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{MAGENTA}{'':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{MAGENTA}{BOLD}{UNDERLINE}{'🔑 CÓDIGO: ' + self.connection_code:^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{MAGENTA}{'':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{MAGENTA}{'▓' * 68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{CYAN}{'':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{CYAN}{BOLD}{'📋 INSTRUCCIONES:':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{CYAN}{'1. Abre Telegram en tu teléfono':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{CYAN}{'2. Busca el bot y envía /start':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{CYAN}{BOLD}{'3. Envía el código: ' + self.connection_code:^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{CYAN}{'4. ¡Listo! Ya puedes controlar esta PC desde Telegram':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}█{RESET}{YELLOW}{'':^68}{RESET}{RED}█{RESET}")
+        print(f"{RED}{border}{RESET}")
+        
+        # Código en formato grande para fácil lectura
+        print(f"\n{YELLOW}{'🔥 CÓDIGO PARA COPIAR 🔥':^70}{RESET}")
+        print(f"{GREEN}{'╔' + '═' * 68 + '╗'}{RESET}")
+        print(f"{GREEN}║{RESET}{BOLD}{UNDERLINE}{self.connection_code:^68}{RESET}{GREEN}║{RESET}")
+        print(f"{GREEN}{'╚' + '═' * 68 + '╝'}{RESET}\n")
+    
+    def _is_user_authorized(self, chat_id):
+        """Verificar si el usuario está autorizado para usar este bot"""
+        return chat_id in self.authorized_users
+    
+    def _authorize_user(self, chat_id):
+        """Autorizar un usuario para usar este bot"""
+        self.authorized_users.add(chat_id)
+        logger.info(f"✅ Usuario {chat_id} autorizado para PC {self.pc_name}")
+    
+    async def _handle_connection_code(self, message_text, chat_id):
+        """Manejar códigos de conexión enviados por usuarios"""
+        if message_text.strip().upper() == self.connection_code:
+            self._authorize_user(chat_id)
+            return True
+        return False
 
     def _setup_bot(self):
         """Configurar el bot con handlers"""
@@ -125,6 +208,9 @@ class TelegramBot:
             # Handler para videos
             from telegram.ext import MessageHandler, filters
             self.application.add_handler(MessageHandler(filters.VIDEO, self._handle_video))
+            
+            # Handler para mensajes de texto (códigos de conexión)
+            self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_text_message))
             
             logger.info("✅ Handlers configurados correctamente")
             
@@ -173,17 +259,108 @@ class TelegramBot:
             logger.error(f"❌ Error iniciando hilo del bot: {thread_error}")
 
     async def _start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Comando /start"""
-        welcome_text = (
-            "🐕 **¡Bienvenido al Monitor de Emociones Caninas!**\n\n"
-            "Tu asistente personal para el bienestar de tu mascota.\n\n"
-            "Usa /menu para ver todas las opciones disponibles."
-        )
-        await update.message.reply_text(welcome_text, parse_mode='Markdown')
-        await self._menu_command(update, context)
+        """Comando /start con sistema de autorización"""
+        chat_id = update.message.chat_id
+        user_name = update.message.from_user.first_name or "Usuario"
+        
+        if self._is_user_authorized(chat_id):
+            # Usuario ya autorizado
+            welcome_text = (
+                f"🐕 **¡Bienvenido de vuelta, {user_name}!**\n\n"
+                f"🖥️ **PC Conectada:** {self.pc_name}\n"
+                f"🔑 **Estado:** Autorizado ✅\n\n"
+                "Tu asistente personal para el bienestar de tu mascota está listo.\n\n"
+                "Usa /menu para ver todas las opciones disponibles."
+            )
+            await update.message.reply_text(welcome_text, parse_mode='Markdown')
+            await self._menu_command(update, context)
+        else:
+            # Usuario no autorizado - solicitar código
+            welcome_text = (
+                f"👋 **¡Hola {user_name}!**\n\n"
+                "🐕 **Bienvenido a Dog Emotion Monitor**\n"
+                "🔐 **Sistema de Acceso Seguro Activado**\n\n"
+                f"🖥️ **PC:** {self.pc_name}\n"
+                f"🔑 **Estado:** Pendiente de autorización\n\n"
+                "📋 **¿Cómo obtener acceso?**\n"
+                "1️⃣ Ve a la PC donde está ejecutándose el servicio\n"
+                "2️⃣ Busca el código colorido que aparece en pantalla\n"
+                "3️⃣ Cópialo y envíalo aquí como mensaje\n\n"
+                "🔑 **Formato del código:** XXXX-1234-ABCD\n\n"
+                "💡 **Ejemplo:**\n"
+                "Si ves `GAMI-5678-MNOP` en pantalla, envía:\n"
+                "`GAMI-5678-MNOP`\n\n"
+                "⚠️ **Nota:** Cada PC tiene su código único.\n"
+                "🔒 **Seguridad:** Solo comparte códigos con personas de confianza."
+            )
+            await update.message.reply_text(welcome_text, parse_mode='Markdown')
+
+    async def _handle_text_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Manejar mensajes de texto (principalmente códigos de conexión)"""
+        chat_id = update.message.chat_id
+        message_text = update.message.text
+        user_name = update.message.from_user.first_name or "Usuario"
+        
+        # Si ya está autorizado, ignorar mensajes de texto
+        if self._is_user_authorized(chat_id):
+            await update.message.reply_text(
+                "ℹ️ **Ya estás conectado**\n\n"
+                "Usa /menu para acceder a las funciones del bot.",
+                parse_mode='Markdown'
+            )
+            return
+        
+        # Intentar autorizar con el código
+        if await self._handle_connection_code(message_text, chat_id):
+            # Código correcto - autorizar usuario
+            success_text = (
+                f"🎉 **¡Conexión exitosa, {user_name}!**\n\n"
+                f"✅ **Autorizado para PC:** {self.pc_name}\n"
+                f"🔑 **Código utilizado:** {self.connection_code}\n\n"
+                "🐕 **Monitor de Emociones Caninas** está ahora disponible.\n\n"
+                "Usa /menu para comenzar a monitorear a tu mascota."
+            )
+            await update.message.reply_text(success_text, parse_mode='Markdown')
+            await self._menu_command(update, context)
+        else:
+            # Código incorrecto
+            error_text = (
+                "❌ **Código Incorrecto**\n\n"
+                f"🔍 **Código recibido:** `{message_text}`\n"
+                f"🖥️ **PC esperada:** {self.pc_name}\n\n"
+                "💡 **Posibles problemas:**\n"
+                "• ❗ Código copiado incorrectamente\n"
+                "• ❗ Espacios o caracteres extra\n"
+                "• ❗ Código de otra PC diferente\n"
+                "• ❗ Aplicación reiniciada (código cambiado)\n\n"
+                "🔄 **¿Qué hacer?**\n"
+                "1️⃣ Ve a la PC y verifica el código actual\n"
+                "2️⃣ Cópialo exactamente como aparece\n"
+                "3️⃣ Envíalo sin espacios extra\n\n"
+                "📋 **Formato:** XXXX-1234-ABCD\n"
+                "🆘 **¿Necesitas ayuda?** Usa /start para ver instrucciones."
+            )
+            await update.message.reply_text(error_text, parse_mode='Markdown')
 
     async def _menu_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Mostrar menú principal con nuevas opciones"""
+        # Verificar autorización
+        chat_id = update.message.chat_id if update.message else update.callback_query.message.chat_id
+        
+        if not self._is_user_authorized(chat_id):
+            unauthorized_text = (
+                "🔐 **ACCESO DENEGADO**\n\n"
+                "❌ No estás autorizado para usar este bot.\n\n"
+                "📋 Para conectarte, envía el código de tu PC.\n"
+                "Usa /start para ver las instrucciones."
+            )
+            
+            if update.message:
+                await update.message.reply_text(unauthorized_text, parse_mode='Markdown')
+            else:
+                await update.callback_query.message.reply_text(unauthorized_text, parse_mode='Markdown')
+            return
+        
         keyboard = [
             [InlineKeyboardButton("📹 Análisis en Tiempo Real", callback_data="realtime_analysis")],
             [InlineKeyboardButton("🎬 Analizar Video", callback_data="video_analysis")],
@@ -192,13 +369,14 @@ class TelegramBot:
             [InlineKeyboardButton("🔔 Activar Monitoreo", callback_data="monitor_on")],
             [InlineKeyboardButton("🔕 Pausar Monitoreo", callback_data="monitor_off")],
             [InlineKeyboardButton("💡 Consejos Generales", callback_data="tips")],
-            [InlineKeyboardButton("🧹 Limpiar Chat", callback_data="clear_chat")],
+            [InlineKeyboardButton("🚪 Desconectar de PC", callback_data="disconnect_pc")],
             [InlineKeyboardButton("❓ Ayuda", callback_data="help")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         menu_text = (
             "🎛️ **MENÚ PRINCIPAL**\n\n"
+            f"🖥️ **PC:** {self.pc_name}\n"
             "Selecciona una opción para gestionar el monitoreo de tu mascota:"
         )
         
@@ -217,9 +395,30 @@ class TelegramBot:
         await update.message.reply_text(status_text, parse_mode='Markdown')
 
     async def _button_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Manejar clics en botones"""
+        """Manejar clics en botones con manejo de errores mejorado"""
         query = update.callback_query
-        await query.answer()
+        
+        # Verificar autorización primero
+        chat_id = query.message.chat_id
+        if not self._is_user_authorized(chat_id):
+            try:
+                await query.answer("❌ No autorizado", show_alert=True)
+            except:
+                pass  # Ignorar errores de query expirado
+            
+            await query.message.reply_text(
+                "🔐 **ACCESO DENEGADO**\n\nUsa /start para autorizar tu acceso.",
+                parse_mode='Markdown'
+            )
+            return
+        
+        # Intentar responder al callback query de forma segura
+        try:
+            await query.answer()
+        except Exception as callback_error:
+            # Ignorar errores de callback expirado
+            logger.debug(f"Callback query expirado/inválido: {callback_error}")
+            pass
         
         # Botón para mostrar menú
         if query.data == "show_menu":
@@ -304,46 +503,115 @@ class TelegramBot:
             # Enviar mensaje nuevo en lugar de editar
             await query.message.reply_text(help_text, reply_markup=reply_markup, parse_mode='Markdown')
             
-        elif query.data == "clear_chat":
-            # Confirmar antes de limpiar
+        elif query.data == "disconnect_pc":
+            # Confirmar antes de desconectar
             keyboard = [
-                [InlineKeyboardButton("✅ Sí, limpiar", callback_data="confirm_clear")],
+                [InlineKeyboardButton("✅ Sí, desconectar", callback_data="confirm_disconnect")],
                 [InlineKeyboardButton("❌ Cancelar", callback_data="show_menu")]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             # Enviar mensaje nuevo en lugar de editar
             await query.message.reply_text(
-                "🧹 **Limpiar Chat**\n\n"
-                "⚠️ Esta acción eliminará todos los mensajes del bot en este chat.\n"
-                "¿Estás seguro de que quieres continuar?",
+                "🚪 **Desconectar de PC**\n\n"
+                f"🖥️ **PC actual:** {self.pc_name}\n\n"
+                "⚠️ Esta acción te desconectará de esta PC.\n"
+                "Tendrás que volver a ingresar el código para reconectarte.\n\n"
+                "¿Estás seguro de que quieres desconectar?",
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
             )
             
-        elif query.data == "confirm_clear":
+        elif query.data == "confirm_disconnect":
             try:
-                # Intentar eliminar mensajes recientes
-                await self._clear_chat_messages(query)
-                # Enviar mensaje nuevo en lugar de editar
+                # Desautorizar al usuario
+                chat_id = query.message.chat_id
+                if chat_id in self.authorized_users:
+                    self.authorized_users.remove(chat_id)
+                
+                # Mensaje de confirmación de desconexión
                 await query.message.reply_text(
-                    "🧹 **Chat Limpiado**\n\n"
-                    "✅ Se han eliminado los mensajes del bot.\n"
-                    "El historial de análisis se mantiene intacto.\n\n"
-                    "Usa /menu para continuar.",
+                    "✅ **Desconectado Exitosamente**\n\n"
+                    f"🖥️ Has sido desconectado de **{self.pc_name}**\n\n"
+                    "🔐 **Para reconectarte:**\n"
+                    "1️⃣ Envía `/start`\n"
+                    "2️⃣ Ingresa el código de conexión actual\n\n"
+                    "👋 ¡Gracias por usar Dog Emotion Monitor!",
                     parse_mode='Markdown'
                 )
+                
             except Exception as e:
-                keyboard = [[InlineKeyboardButton("� Mostrar Menú", callback_data="show_menu")]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                # Enviar mensaje nuevo en lugar de editar
+                logger.error(f"Error desconectando usuario: {e}")
                 await query.message.reply_text(
-                    "❌ **Error al limpiar**\n\n"
-                    "No se pudieron eliminar todos los mensajes.\n"
-                    "Esto puede deberse a limitaciones de Telegram.\n\n"
+                    "❌ **Error al desconectar**\n\n"
+                    "Hubo un problema al procesar la desconexión.\n"
+                    "Usa /start para intentar reconectarte.",
+                    parse_mode='Markdown'
+                )
+                
+                await query.message.reply_text(
+                    "🧹 **LIMPIEZA COMPLETADA**\n\n"
+                    "✅ Se intentó limpiar los mensajes del bot\n"
+                    "💡 Algunos mensajes pueden no eliminarse debido a limitaciones de Telegram\n"
+                    "📊 El historial de análisis se mantiene intacto\n\n"
                     "Puedes eliminar mensajes manualmente si es necesario.",
                     reply_markup=reply_markup,
                     parse_mode='Markdown'
                 )
+                
+            except Exception as e:
+                logger.error(f"Error en limpieza de chat: {e}")
+                
+                # Enviar mensaje de error pero mantener conexión
+                keyboard = [[InlineKeyboardButton("🏠 Regresar al Menú", callback_data="show_menu")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                await query.message.reply_text(
+                    "⚠️ **LIMPIEZA PARCIAL**\n\n"
+                    "❌ Hubo problemas eliminando algunos mensajes\n"
+                    "💡 Esto es normal debido a limitaciones de Telegram\n"
+                    "🔧 Puedes intentar eliminar mensajes manualmente\n\n"
+                    "El sistema continúa funcionando normalmente.",
+                    reply_markup=reply_markup,
+                    parse_mode='Markdown'
+                )
+            
+        # Callback para confirmar pausa de análisis en tiempo real
+        elif query.data == "confirm_pause_realtime":
+            # Pausar análisis en tiempo real y proceder con análisis de video
+            if self.realtime_active:
+                await self._pause_realtime_analysis()
+                await query.message.reply_text(
+                    "⏸️ **Análisis en Tiempo Real Pausado**\n\n"
+                    "✅ Análisis pausado exitosamente\n"
+                    "🎬 Ahora puedes enviar videos para análisis\n\n"
+                    "💡 Usa el botón 'Tiempo Real' cuando quieras reanudar.",
+                    parse_mode='Markdown'
+                )
+            
+            # Proceder con la solicitud de análisis de video
+            keyboard = [
+                [InlineKeyboardButton("📹 Cambiar a Tiempo Real", callback_data="realtime_analysis")],
+                [InlineKeyboardButton("🏠 Regresar al Menú", callback_data="show_menu")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.reply_text(
+                "🎬 **ANÁLISIS DE VIDEO**\n\n"
+                "📎 **Envía un video de tu mascota** y lo analizaré automáticamente.\n\n"
+                "📋 **Requisitos del video:**\n"
+                "• Formato: MP4, AVI, MOV\n"
+                "• Duración: Máximo 2 minutos\n"
+                "• Tamaño: Máximo 20MB\n"
+                "• Tu perro debe ser visible claramente\n\n"
+                "🔄 **Proceso:**\n"
+                "1️⃣ Envía el video como archivo adjunto\n"
+                "2️⃣ Procesaré automáticamente el video\n"
+                "3️⃣ Te enviaré el video con análisis superpuesto\n"
+                "4️⃣ Recibirás un resumen completo con recomendaciones\n\n"
+                "📤 **¡Adelante, envía tu video ahora!**",
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            )
             
         # Nuevos handlers para análisis en tiempo real
         elif query.data == "start_realtime":
@@ -375,6 +643,9 @@ class TelegramBot:
         elif query.data == "switch_to_video":
             await self._pause_realtime_analysis()
             await self._handle_video_analysis_request(update, context)
+            
+        elif query.data == "capture_frame":
+            await self._capture_current_frame(update, context)
 
     async def _handle_realtime_analysis(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Manejar el análisis en tiempo real"""
@@ -384,6 +655,7 @@ class TelegramBot:
             # Si ya está activo, mostrar opciones de control
             keyboard = [
                 [InlineKeyboardButton("⏸️ Pausar Análisis", callback_data="pause_realtime")],
+                [InlineKeyboardButton("📸 Ver Ahora", callback_data="capture_frame")],
                 [InlineKeyboardButton("⏹️ Detener Análisis", callback_data="stop_realtime")],
                 [InlineKeyboardButton("🎬 Cambiar a Video", callback_data="switch_to_video")],
                 [InlineKeyboardButton("🏠 Regresar al Menú", callback_data="show_menu")]
@@ -394,7 +666,8 @@ class TelegramBot:
                 "📹 **ANÁLISIS EN TIEMPO REAL ACTIVO**\n\n"
                 "✅ El sistema está analizando a tu mascota en vivo\n"
                 "📊 Recibes actualizaciones en tiempo real\n"
-                "🔔 Alertas automáticas activadas\n\n"
+                "🔔 Alertas automáticas activadas\n"
+                "📸 Puedes capturar frames instantáneos\n\n"
                 "**Opciones disponibles:**",
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
@@ -428,10 +701,32 @@ class TelegramBot:
         """Manejar solicitud de análisis de video"""
         query = update.callback_query
         
-        # Si hay análisis en tiempo real activo, pausarlo
+        # Verificar si hay análisis en tiempo real activo
         if self.realtime_active:
-            await self._pause_realtime_analysis()
+            # Mostrar advertencia antes de pausar
+            keyboard = [
+                [InlineKeyboardButton("✅ Sí, pausar y analizar video", callback_data="confirm_pause_realtime")],
+                [InlineKeyboardButton("❌ No, mantener tiempo real", callback_data="realtime_analysis")],
+                [InlineKeyboardButton("🏠 Regresar al Menú", callback_data="show_menu")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             
+            await query.message.reply_text(
+                "⚠️ **ANÁLISIS EN TIEMPO REAL ACTIVO**\n\n"
+                "🔴 **Estado actual:** Análisis en tiempo real ejecutándose\n\n"
+                "🎬 **¿Quieres analizar un video?**\n"
+                "Para analizar un video, necesito pausar el análisis en tiempo real.\n\n"
+                "📋 **¿Qué pasará?**\n"
+                "• ⏸️ Se pausará el análisis en tiempo real\n"
+                "• 🎬 Se activará el modo de análisis de video\n"
+                "• 🔄 Podrás reanudar tiempo real después\n\n"
+                "¿Quieres continuar?",
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            )
+            return
+        
+        # Si no hay análisis en tiempo real activo, proceder normalmente
         keyboard = [
             [InlineKeyboardButton("📹 Cambiar a Tiempo Real", callback_data="realtime_analysis")],
             [InlineKeyboardButton("🏠 Regresar al Menú", callback_data="show_menu")]
@@ -495,6 +790,7 @@ class TelegramBot:
             
             keyboard = [
                 [InlineKeyboardButton("⏸️ Pausar", callback_data="pause_realtime")],
+                [InlineKeyboardButton("📸 Ver Ahora", callback_data="capture_frame")],
                 [InlineKeyboardButton("⏹️ Detener", callback_data="stop_realtime")],
                 [InlineKeyboardButton("🎬 Cambiar a Video", callback_data="switch_to_video")],
                 [InlineKeyboardButton("🏠 Menú", callback_data="show_menu")]
@@ -505,7 +801,8 @@ class TelegramBot:
                 "🚀 **ANÁLISIS EN TIEMPO REAL INICIADO**\n\n"
                 "✅ Cámara activada\n"
                 "📹 Analizando video en vivo\n"
-                "🔔 Alertas automáticas activadas\n\n"
+                "🔔 Alertas automáticas activadas\n"
+                "📸 Función de captura instantánea disponible\n\n"
                 "💡 **Tip:** Mantén a tu mascota visible en la cámara para mejores resultados.\n\n"
                 "El análisis se está ejecutando en segundo plano.",
                 reply_markup=reply_markup,
@@ -522,175 +819,229 @@ class TelegramBot:
             )
 
     def _realtime_analysis_worker(self, chat_id):
-        """Worker que ejecuta el análisis en tiempo real usando la lógica probada"""
+        """Worker que ejecuta el análisis en tiempo real usando EXACTAMENTE la misma lógica que la opción 2 de la consola"""
         try:
-            logger.info("📹 Iniciando worker de análisis en tiempo real...")
+            logger.info("📹 Iniciando análisis en tiempo real desde Telegram (usando lógica de consola)...")
             
-            # Importar OpenCV al inicio
             import cv2
+            import time
+            import os
             
-            # Encontrar cámara disponible
+            # Encontrar cámara disponible (misma función que main.py)
             camera_index = self._find_available_camera()
             if camera_index is None:
-                logger.error("❌ No se encontró cámara disponible")
-                self._send_error_to_chat(chat_id, "❌ No se encontró cámara disponible")
+                logger.error("❌ No se encontró ninguna cámara")
+                self._send_error_to_chat(chat_id, "❌ No se encontró ninguna cámara disponible")
                 return
             
-            # Inicializar componentes usando la misma lógica que funciona
-            logger.info("🧠 Cargando modelos de IA...")
+            # Inicializar componentes (exactamente como en main.py)
             try:
+                logger.info("🧠 Cargando modelo de IA...")
                 from .cam_utils import EmotionDetector
+                detector = EmotionDetector("modelo/mejor_modelo_83.h5")
+                logger.info("✅ Modelo de emociones cargado exitosamente")
+            except Exception as e:
+                logger.error(f"❌ Error cargando modelo: {e}")
+                self._send_error_to_chat(chat_id, f"❌ Error cargando modelo: {e}")
+                return
+            
+            try:
+                logger.info("🐕 Inicializando detector YOLO optimizado...")
                 from .yolo_dog_detector import YoloDogDetector
-            except ImportError:
-                # Intento alternativo si las importaciones relativas fallan
-                import sys
-                import os
-                sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-                from utils.cam_utils import EmotionDetector
-                from utils.yolo_dog_detector import YoloDogDetector
+                yolo_detector = YoloDogDetector(confidence_threshold=0.60)
+                logger.info("✅ YOLOv8 cargado exitosamente (umbral: 60%)")
+            except Exception as e:
+                logger.error(f"❌ Error cargando YOLO: {e}")
+                self._send_error_to_chat(chat_id, f"❌ Error cargando YOLO: {e}")
+                return
             
-            detector = EmotionDetector("modelo/mejor_modelo_83.h5")
-            yolo_detector = YoloDogDetector(confidence_threshold=0.60)
+            # Inicializar cámara (EXACTO como en main.py)
+            cap = cv2.VideoCapture(camera_index)
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            cap.set(cv2.CAP_PROP_FPS, 30)
             
-            # Abrir cámara usando la misma configuración que funciona
-            self.camera_capture = cv2.VideoCapture(camera_index)
-            self.camera_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            self.camera_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-            self.camera_capture.set(cv2.CAP_PROP_FPS, 30)
-            
-            if not self.camera_capture.isOpened():
+            if not cap.isOpened():
                 logger.error("❌ No se pudo abrir la cámara")
                 self._send_error_to_chat(chat_id, "❌ No se pudo abrir la cámara")
                 return
             
+            # Notificar éxito
             logger.info("✅ Análisis en tiempo real iniciado correctamente")
-            self._send_status_to_chat(chat_id, "✅ **CÁMARA ACTIVADA**\n\nEl análisis en tiempo real está funcionando.\n\n🖥️ **Una ventana de la cámara se abrirá en tu PC**")
+            self._send_status_to_chat(chat_id, "✅ **ANÁLISIS EN TIEMPO REAL INICIADO**\n\n🖥️ **Una ventana de cámara se abrió en tu PC**\n\n🎮 **Controles:**\n• Q o ESC: Salir\n• Telegram: Control remoto")
             
-            # Variables de seguimiento usando la misma lógica que funciona
+            # Variables de control (EXACTAS como en main.py)
             emotion_history = []
-            cooldown_time = 2  # Mismo que en main.py
+            cooldown_time = 2  # Reducido a 2 segundos para mejor responsividad
             last_analysis_time = time.time()
             frame_count = 0
-            last_alert_time = 0
-            last_update_time = time.time()
             
-            # Configurar ventana de OpenCV
-            window_name = "🐕 Dog Emotion Monitor - Análisis en Tiempo Real"
-            cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(window_name, 100, 100)
+            logger.info("\n🎮 CONTROLES:")
+            logger.info("  Q o ESC: Salir")
+            logger.info("  Telegram: Control remoto completo")
+            logger.info("\n▶️ Iniciando detección...\n")
             
-            logger.info("🖥️ Ventana de cámara abierta - presiona 'q' para pausar o 'ESC' para detener")
-            logger.info("🎮 CONTROLES: Q o ESC=Salir | Telegram=Control remoto")
-            
-            while self.realtime_active and not self.realtime_stop_flag:
-                ret, frame = self.camera_capture.read()
-                if not ret:
-                    logger.error("Error capturando frame")
-                    continue
+            # BUCLE PRINCIPAL - COPIA EXACTA DE run_camera_analysis en main.py
+            try:
+                while self.realtime_active and not self.realtime_stop_flag:
+                    ret, frame = cap.read()
+                    if not ret:
+                        logger.error("Error capturando frame")
+                        break
+
+                    current_time = time.time()
+                    frame_count += 1
+                    
+                    # Actualizar frame actual para captura remota (thread-safe)
+                    with self.frame_lock:
+                        self.current_frame = frame.copy()
+                    
+                    # PASO 1: Detectar perros con YOLO
+                    dog_detections = yolo_detector.detect_dogs(frame)
+                    dogs_detected = yolo_detector.is_dog_detected(dog_detections)
+                    
+                    # PASO 2: Dibujar detecciones de YOLO solamente
+                    frame = yolo_detector.draw_detections(frame, dog_detections)
+                    
+                    # PASO 3: Solo analizar emociones SI hay perros detectados
+                    if dogs_detected and current_time - last_analysis_time >= cooldown_time:
+                        try:
+                            logger.info(f"🐕 Analizando emociones... (perro detectado)")
+                            emotion, prob, preds = detector.predict_emotion(frame)
+                            
+                            # Debug: Mostrar todas las predicciones para entender el problema
+                            logger.info("📊 Análisis detallado de emociones:")
+                            for label, p in zip(detector.labels, preds):
+                                logger.info(f"  {label}: {p:.4f} ({'⭐' if p == max(preds) else ''})")
+                            logger.info(f"  🎯 Resultado final: {emotion.upper()} ({prob:.3f})")
+                            
+                            # Verificar si hay un problema con la clasificación
+                            if emotion == 'relaxed' and max(preds) < 0.6:
+                                logger.warning(f"⚠️ Confianza baja en 'relaxed' ({prob:.3f}) - Podría ser clasificación incorrecta")
+
+                            # Determinar color según emoción
+                            color = (0, 255, 0)  # Verde por defecto
+                            if emotion in ['angry', 'sad']:
+                                color = (0, 0, 255)  # Rojo para emociones negativas
+                            elif emotion == 'happy':
+                                color = (0, 255, 255)  # Amarillo para feliz
+                            
+                            # Mostrar emoción en el frame con mejor posicionamiento
+                            emotion_text = f'EMOCION: {emotion.upper()} ({prob:.2f})'
+                            if dogs_detected:
+                                # Si hay detección YOLO, mostrar cerca del rectángulo
+                                best_detection = yolo_detector.get_best_dog_region(dog_detections)
+                                if best_detection:
+                                    x, y, w, h = best_detection
+                                    cv2.putText(frame, emotion_text, (x, y + h + 30), 
+                                               cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+                                else:
+                                    cv2.putText(frame, emotion_text, (60, 120), 
+                                               cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+                            else:
+                                # Si no hay detección YOLO, mostrar en posición fija
+                                cv2.putText(frame, emotion_text, (60, 120), 
+                                           cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+
+                            # Acumular historial de emociones
+                            emotion_history.append(emotion)
+                            if len(emotion_history) > 4:  # Reducido de 8 a 4 para mejor responsividad
+                                emotion_history.pop(0)
+                            
+                            # Actualizar historial en el bot
+                            self.update_emotion_history(emotion)
+
+                            # Verificar patrones preocupantes (reducido a 3 análisis negativos de 4)
+                            if len(emotion_history) >= 3 and all(e in ['sad', 'angry'] for e in emotion_history[-3:]):
+                                logger.warning(f"🚨 Patrón preocupante detectado: {emotion} repetidamente")
+                                
+                                try:
+                                    # Capturar imagen para la alerta
+                                    timestamp = int(time.time())
+                                    path = f"alerta_{emotion}_{timestamp}_{int(prob*100)}.jpg"
+                                    cv2.imwrite(path, frame)
+                                    
+                                    # Enviar alerta con recomendaciones (función que ya existe)
+                                    self.send_alert(emotion, prob, image_path=path)
+                                    
+                                    # Limpiar archivo temporal
+                                    try:
+                                        os.remove(path)
+                                    except:
+                                        pass
+                                    
+                                    emotion_history.clear()  # Reiniciar para evitar spam
+                                    logger.info("📱 Alerta enviada por Telegram")
+                                    
+                                except Exception as e:
+                                    logger.error(f"Error enviando alerta: {e}")
+
+                            last_analysis_time = current_time
+                            
+                        except Exception as e:
+                            logger.error(f"Error en análisis de emoción: {e}")
+                    
+                    elif not dogs_detected:
+                        # Solo mostrar mensaje de espera si no hay detecciones
+                        cv2.putText(frame, 'ESPERANDO DETECCION DE PERRO...', 
+                                   (60, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+                        # Limpiar historial si no hay perros por mucho tiempo
+                        if current_time - last_analysis_time > 30:  # 30 segundos sin perros
+                            if emotion_history:
+                                emotion_history.clear()
+                                logger.info("🧹 Historial limpiado - Sin perros detectados")
+
+                    # Mostrar información de estado en el frame
+                    info_y = frame.shape[0] - 100
+                    cv2.putText(frame, f'Frame: {frame_count}', (10, info_y), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+                    cv2.putText(frame, f'Perros detectados: {len(dog_detections)}', (10, info_y + 20), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+                    cv2.putText(frame, f'Historial emocional: {len(emotion_history)}/4', (10, info_y + 40), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+                    
+                    # Controles para Telegram
+                    cv2.putText(frame, 'Q: salir | Telegram: control remoto', (10, info_y + 60), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+
+                    cv2.imshow('🐕 Dog Emotion Monitor + YOLOv8', frame)
+
+                    # Manejar teclas
+                    key = cv2.waitKey(1) & 0xFF
+                    if key == ord('q') or key == 27:  # Q o ESC
+                        logger.info("👋 Saliendo del análisis en tiempo real...")
+                        self.realtime_stop_flag = True
+                        break
+
+            except KeyboardInterrupt:
+                logger.info("⚠️ Interrupción por usuario")
+            except Exception as e:
+                logger.error(f"❌ Error en bucle principal: {e}")
                 
-                current_time = time.time()
-                frame_count += 1
-                
-                # PASO 1: Detectar perros con YOLO (usando la lógica que funciona)
-                dog_detections = yolo_detector.detect_dogs(frame)
-                dogs_detected = yolo_detector.is_dog_detected(dog_detections)
-                
-                # PASO 2: Dibujar detecciones de YOLO solamente (como en main.py)
-                frame = yolo_detector.draw_detections(frame, dog_detections)
-                
-                # PASO 3: Solo analizar emociones SI hay perros detectados
-                if dogs_detected and current_time - last_analysis_time >= cooldown_time:
-                    try:
-                        logger.info(f"🐕 Analizando emociones... (perro detectado)")
-                        emotion, prob, preds = detector.predict_emotion(frame)
-                        
-                        logger.info(f"🎯 Emoción detectada: {emotion.upper()} ({prob:.3f})")
-                        
-                        # Determinar color según emoción
-                        color = (0, 255, 0)  # Verde por defecto
-                        if emotion in ['angry', 'sad']:
-                            color = (0, 0, 255)  # Rojo para emociones negativas
-                        elif emotion == 'happy':
-                            color = (0, 255, 0)  # Verde para happy
-                        elif emotion == 'relaxed':
-                            color = (255, 255, 0)  # Amarillo para relaxed
-                        
-                        # Mostrar resultado en frame
-                        cv2.putText(frame, f"Emotion: {emotion.upper()}", (10, 30), 
-                                  cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
-                        cv2.putText(frame, f"Confidence: {prob:.3f}", (10, 60), 
-                                  cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
-                        
-                        # Gestionar historial de emociones
-                        emotion_history.append((emotion, prob, current_time))
-                        if len(emotion_history) > 50:  # Mantener últimas 50 detecciones
-                            emotion_history.pop(0)
-                        
-                        # Enviar alerta si es necesario (cada 30 segundos máximo)
-                        if current_time - last_alert_time > 30:
-                            if emotion in ['angry', 'sad'] and prob > 0.7:
-                                self._send_emotion_alert(chat_id, emotion, prob)
-                                last_alert_time = current_time
-                        
-                        # Enviar actualización cada 60 segundos
-                        if current_time - last_update_time > 60:
-                            emotion_counts = {'happy': 0, 'sad': 0, 'angry': 0, 'relaxed': 0}
-                            for emo, _, _ in emotion_history:
-                                emotion_counts[emo] += 1
-                            self._send_realtime_update(chat_id, emotion_counts, frame_count)
-                            last_update_time = current_time
-                        
-                        last_analysis_time = current_time
-                        
-                    except Exception as e:
-                        logger.debug(f"Error analizando emoción: {e}")
-                
-                # Agregar información adicional en la pantalla
-                cv2.putText(frame, f"Frame: {frame_count}", (10, frame.shape[0] - 40), 
-                          cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
-                cv2.putText(frame, f"Dogs: {'YES' if dogs_detected else 'NO'}", (10, frame.shape[0] - 20), 
-                          cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0) if dogs_detected else (128, 128, 128), 1)
-                
-                # Controles
-                cv2.putText(frame, "Q=Pause | ESC=Stop | Telegram=Remote", (10, frame.shape[0] - 5), 
-                          cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
-                
-                # Mostrar frame
-                cv2.imshow(window_name, frame)
-                
-                # Manejar teclas
-                key = cv2.waitKey(1) & 0xFF
-                if key == ord('q') or key == ord('Q'):
-                    # Pausar análisis
-                    logger.info("⏸️ Análisis pausado por tecla 'Q'")
-                    self.realtime_active = False
-                    self.current_mode = "paused"
-                    break
-                elif key == 27:  # ESC
-                    # Detener análisis
-                    logger.info("⏹️ Análisis detenido por tecla 'ESC'")
-                    self.realtime_stop_flag = True
-                    break
-            
-            # Limpiar al terminar
-            cv2.destroyAllWindows()
-            if self.camera_capture:
-                self.camera_capture.release()
-                self.camera_capture = None
-                
-            logger.info("🔚 Análisis en tiempo real terminado - ventana cerrada")
-            
         except Exception as e:
             logger.error(f"❌ Error en worker de análisis: {e}")
             self._send_error_to_chat(chat_id, f"❌ Error en análisis: {str(e)[:50]}...")
         finally:
-            # Asegurar que se cierre todo
-            cv2.destroyAllWindows()
-            if self.camera_capture:
-                self.camera_capture.release()
-                self.camera_capture = None
+            # Cleanup (exacto como en main.py)
+            try:
+                if 'cap' in locals():
+                    cap.release()
+                cv2.destroyAllWindows()
+                
+                logger.info("🏁 Análisis en tiempo real terminado exitosamente")
+                self._send_status_to_chat(chat_id, "🏁 **ANÁLISIS TERMINADO**\n\nLa ventana de cámara se ha cerrado.\n\nUsa el menú para iniciar nuevamente.")
+                
+            except Exception as cleanup_error:
+                logger.error(f"Error en cleanup: {cleanup_error}")
+                
+            # Resetear estado
             self.realtime_active = False
+            self.realtime_stop_flag = False
             self.current_mode = "menu"
+            
+            # Limpiar frame actual
+            with self.frame_lock:
+                self.current_frame = None
 
     async def _resume_realtime_analysis(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Reanudar análisis en tiempo real"""
@@ -723,7 +1074,7 @@ class TelegramBot:
             return
         
         # Reiniciar análisis
-        await self._start_realtime_analysis(update, context, chat_id=update.effective_chat.id)
+        await self._start_realtime_analysis(update, context)
 
     def _find_available_camera(self):
         """Encuentra la primera cámara disponible"""
@@ -860,6 +1211,202 @@ class TelegramBot:
         
         logger.info("✅ Análisis en tiempo real detenido correctamente")
 
+    async def _capture_current_frame(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Capturar y enviar frame actual con análisis"""
+        try:
+            import cv2  # Import necesario para el procesamiento de frames
+            import os   # Import para manejo de archivos temporales
+            logger.info("📸 Solicitud de captura de frame desde Telegram...")
+            
+            if not self.realtime_active:
+                keyboard = [[InlineKeyboardButton("🏠 Regresar al Menú", callback_data="show_menu")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                await update.callback_query.message.reply_text(
+                    "⚠️ **ANÁLISIS NO ACTIVO**\n\n"
+                    "El análisis en tiempo real no está ejecutándose.\n"
+                    "Inicia el análisis para poder capturar frames.",
+                    reply_markup=reply_markup,
+                    parse_mode='Markdown'
+                )
+                return
+            
+            # Obtener frame actual de forma thread-safe
+            current_frame = None
+            with self.frame_lock:
+                if self.current_frame is not None:
+                    current_frame = self.current_frame.copy()
+            
+            if current_frame is None:
+                keyboard = [[InlineKeyboardButton("🔄 Reintentar", callback_data="capture_frame"),
+                           InlineKeyboardButton("🏠 Menú", callback_data="show_menu")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                await update.callback_query.message.reply_text(
+                    "⚠️ **NO HAY FRAME DISPONIBLE**\n\n"
+                    "El sistema aún no ha capturado ningún frame.\n"
+                    "Espera unos segundos e intenta nuevamente.",
+                    reply_markup=reply_markup,
+                    parse_mode='Markdown'
+                )
+                return
+            
+            # Procesar frame con análisis completo
+            try:
+                # Cargar detectores si no están cargados
+                from .cam_utils import EmotionDetector
+                from .yolo_dog_detector import YoloDogDetector
+                
+                detector = EmotionDetector("modelo/mejor_modelo_83.h5")
+                yolo_detector = YoloDogDetector(confidence_threshold=0.60)
+                
+                # Detectar perros
+                dog_detections = yolo_detector.detect_dogs(current_frame)
+                dogs_detected = yolo_detector.is_dog_detected(dog_detections)
+                
+                # Dibujar detecciones YOLO
+                processed_frame = yolo_detector.draw_detections(current_frame, dog_detections)
+                
+                # Análisis de emociones si hay perros
+                analysis_text = "🔍 **ANÁLISIS INSTANTÁNEO**\n\n"
+                
+                if dogs_detected:
+                    try:
+                        emotion, prob, preds = detector.predict_emotion(processed_frame)
+                        
+                        # Determinar color y dibujar emoción en frame
+                        color = (0, 255, 0)  # Verde por defecto
+                        if emotion in ['angry', 'sad']:
+                            color = (0, 0, 255)  # Rojo para negativas
+                        elif emotion == 'happy':
+                            color = (0, 255, 255)  # Amarillo para feliz
+                        
+                        # Dibujar emoción en el frame
+                        emotion_text = f'EMOCION: {emotion.upper()} ({prob:.2f})'
+                        best_detection = yolo_detector.get_best_dog_region(dog_detections)
+                        if best_detection:
+                            x, y, w, h = best_detection
+                            cv2.putText(processed_frame, emotion_text, (x, y + h + 30), 
+                                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+                        else:
+                            cv2.putText(processed_frame, emotion_text, (50, 120), 
+                                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+                        
+                        # Texto del análisis
+                        emoji_map = {"happy": "😊", "sad": "😢", "angry": "😠", "relaxed": "😌"}
+                        emoji = emoji_map.get(emotion, "🐕")
+                        
+                        analysis_text += f"🐕 **Perros detectados:** {len(dog_detections)}\n"
+                        analysis_text += f"{emoji} **Emoción:** {emotion.upper()}\n"
+                        analysis_text += f"📊 **Confianza:** {prob:.1%}\n\n"
+                        
+                        # Recomendaciones
+                        recommendations = self.get_recommendations(emotion)
+                        if recommendations:
+                            analysis_text += "💡 **Recomendación:**\n"
+                            analysis_text += recommendations[0] if len(recommendations) > 0 else ""
+                        
+                    except Exception as e:
+                        logger.error(f"Error en análisis de emoción: {e}")
+                        analysis_text += "⚠️ Error analizando emoción\n"
+                        analysis_text += f"🐕 **Perros detectados:** {len(dog_detections)}"
+                else:
+                    analysis_text += "🔍 **Estado:** Esperando detección de perro\n"
+                    analysis_text += "💡 **Tip:** Asegúrate de que tu mascota esté visible en la cámara"
+                    
+                    # Dibujar mensaje en frame
+                    cv2.putText(processed_frame, 'ESPERANDO DETECCION DE PERRO...', 
+                               (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+                
+                # Agregar timestamp al frame
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                cv2.putText(processed_frame, f'Captura: {timestamp}', 
+                           (10, processed_frame.shape[0] - 10), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                
+                # Guardar frame temporalmente
+                temp_path = f"temp_capture_{int(time.time())}.jpg"
+                cv2.imwrite(temp_path, processed_frame)
+                
+                # Enviar imagen con análisis
+                analysis_text += f"\n⏰ **Capturado:** {timestamp}"
+                success = self.send_image_with_caption_to_user(temp_path, analysis_text, update.callback_query.message.chat_id)
+                
+                # Limpiar archivo temporal
+                try:
+                    os.remove(temp_path)
+                except:
+                    pass
+                
+                if success:
+                    # Botones de seguimiento
+                    keyboard = [
+                        [InlineKeyboardButton("📸 Capturar Otra", callback_data="capture_frame")],
+                        [InlineKeyboardButton("⏸️ Pausar Análisis", callback_data="pause_realtime")],
+                        [InlineKeyboardButton("🏠 Menú", callback_data="show_menu")]
+                    ]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    
+                    await update.callback_query.message.reply_text(
+                        "✅ **CAPTURA ENVIADA**\n\n"
+                        "📸 Frame capturado con análisis completo\n"
+                        "🔄 El análisis en tiempo real continúa\n\n"
+                        "Puedes capturar otra imagen cuando gustes.",
+                        reply_markup=reply_markup,
+                        parse_mode='Markdown'
+                    )
+                    logger.info("📸 Frame capturado y enviado exitosamente")
+                else:
+                    raise Exception("Error enviando imagen")
+                    
+            except Exception as analysis_error:
+                logger.error(f"Error procesando frame: {analysis_error}")
+                
+                # Enviar frame sin análisis como respaldo
+                temp_path = f"temp_simple_{int(time.time())}.jpg"
+                cv2.imwrite(temp_path, current_frame)
+                
+                simple_caption = (
+                    "📸 **CAPTURA DE CÁMARA**\n\n"
+                    "⚠️ Frame capturado sin análisis detallado\n"
+                    f"⏰ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                    "El sistema continúa funcionando normalmente."
+                )
+                
+                self.send_image_with_caption_to_user(temp_path, simple_caption, update.callback_query.message.chat_id)
+                
+                try:
+                    os.remove(temp_path)
+                except:
+                    pass
+                
+                keyboard = [[InlineKeyboardButton("🔄 Reintentar", callback_data="capture_frame"),
+                           InlineKeyboardButton("🏠 Menú", callback_data="show_menu")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                await update.callback_query.message.reply_text(
+                    "⚠️ **CAPTURA PARCIAL**\n\n"
+                    "Se capturó la imagen pero hubo un problema con el análisis.\n"
+                    "El sistema sigue funcionando normalmente.",
+                    reply_markup=reply_markup,
+                    parse_mode='Markdown'
+                )
+                
+        except Exception as e:
+            logger.error(f"❌ Error general en captura de frame: {e}")
+            
+            keyboard = [[InlineKeyboardButton("🔄 Reintentar", callback_data="capture_frame"),
+                       InlineKeyboardButton("🏠 Menú", callback_data="show_menu")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await update.callback_query.message.reply_text(
+                "❌ **ERROR EN CAPTURA**\n\n"
+                "No se pudo capturar el frame actual.\n"
+                "Verifica que el análisis esté ejecutándose correctamente.",
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            )
+
     def _get_current_status(self):
         """Obtener estado actual"""
         if not self.emotion_history:
@@ -991,6 +1538,34 @@ class TelegramBot:
                     
         except Exception as e:
             logger.error(f"❌ Error enviando imagen: {e}")
+            return False
+
+    def send_image_with_caption_to_user(self, image_path, caption, target_chat_id):
+        """Envía una imagen con texto a un chat específico (multiusuario)"""
+        try:
+            logger.info(f"📸 Enviando imagen a chat {target_chat_id}: {image_path}")
+            
+            url = f"https://api.telegram.org/bot{self.token}/sendPhoto"
+            
+            with open(image_path, 'rb') as photo:
+                files = {'photo': photo}
+                data = {
+                    'chat_id': target_chat_id,  # Chat específico del usuario
+                    'caption': caption,
+                    'parse_mode': 'Markdown'
+                }
+                
+                response = requests.post(url, files=files, data=data, timeout=15)
+                
+                if response.status_code == 200:
+                    logger.info(f"✅ Imagen enviada exitosamente a chat {target_chat_id}")
+                    return True
+                else:
+                    logger.error(f"❌ Error enviando imagen a chat {target_chat_id}: {response.status_code} - {response.text}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Error enviando imagen a chat {target_chat_id}: {e}")
             return False
 
     def send_alert(self, emotion, probability, image_path=None):
@@ -1824,133 +2399,9 @@ class TelegramBot:
         distribution = self._get_emotion_distribution(emotion_history)
         return max(distribution.items(), key=lambda x: x[1])[0] if distribution else "No detectado"
 
-    def clear_chat_sync(self):
-        """Limpiar chat de forma síncrona"""
-        try:
-            import asyncio
-            import threading
-            
-            # Variable para almacenar el resultado
-            clear_result = {'success': False, 'error': None, 'deleted_count': 0}
-            
-            async def _clear_async():
-                """Función async interna para limpieza"""
-                try:
-                    # Enviar mensaje temporal para obtener ID
-                    temp_msg = await self.bot.send_message(
-                        chat_id=self.chat_id,
-                        text="🧹 Limpiando chat..."
-                    )
-                    
-                    # Usar el ID del mensaje temporal para eliminar mensajes anteriores
-                    deleted_count = 0
-                    current_id = temp_msg.message_id
-                    
-                    # Intentar eliminar mensajes anteriores
-                    for i in range(1, 21):
-                        try:
-                            message_id_to_delete = current_id - i
-                            if message_id_to_delete > 0:
-                                await self.bot.delete_message(
-                                    chat_id=self.chat_id, 
-                                    message_id=message_id_to_delete
-                                )
-                                deleted_count += 1
-                        except Exception:
-                            continue
-                    
-                    # Eliminar el mensaje temporal también
-                    try:
-                        await self.bot.delete_message(
-                            chat_id=self.chat_id, 
-                            message_id=current_id
-                        )
-                    except Exception:
-                        pass
-                    
-                    # Enviar confirmación
-                    await self.bot.send_message(
-                        chat_id=self.chat_id,
-                        text=f"✅ Chat limpiado: {deleted_count} mensajes eliminados"
-                    )
-                    
-                    clear_result['success'] = True
-                    clear_result['deleted_count'] = deleted_count
-                    
-                except Exception as e:
-                    clear_result['error'] = e
-                    logger.error(f"❌ Error en limpieza async: {e}")
-            
-            def _run_clear():
-                """Ejecutar limpieza en nuevo event loop"""
-                try:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    loop.run_until_complete(_clear_async())
-                except Exception as e:
-                    clear_result['error'] = e
-                    logger.error(f"❌ Error en loop de limpieza: {e}")
-                finally:
-                    try:
-                        loop.close()
-                    except:
-                        pass
-            
-            # Ejecutar en hilo separado
-            clear_thread = threading.Thread(target=_run_clear)
-            clear_thread.start()
-            clear_thread.join(timeout=15)  # Timeout de 15 segundos
-            
-            if clear_thread.is_alive():
-                logger.error("❌ Timeout limpiando chat")
-                return False
-            
-            if clear_result['success']:
-                logger.info(f"🧹 {clear_result['deleted_count']} mensajes eliminados desde main.py")
-                return True
-            elif clear_result['error']:
-                raise clear_result['error']
-            else:
-                return False
-            
-        except Exception as e:
-            logger.error(f"❌ Error limpiando chat desde main.py: {e}")
-            return False
-
     def _get_current_time(self):
         """Obtiene la hora actual formateada"""
         return datetime.now().strftime("%H:%M:%S")
-
-    async def _clear_chat_messages(self, query):
-        """Intentar limpiar mensajes del chat"""
-        try:
-            deleted_count = 0
-            current_message_id = query.message.message_id
-            
-            # Intentar eliminar los últimos 20 mensajes
-            for i in range(1, 21):
-                try:
-                    message_id_to_delete = current_message_id - i
-                    if message_id_to_delete > 0:
-                        await self.bot.delete_message(
-                            chat_id=self.chat_id, 
-                            message_id=message_id_to_delete
-                        )
-                        deleted_count += 1
-                        # Pequeña pausa para evitar rate limiting
-                        await asyncio.sleep(0.1)
-                except Exception as msg_error:
-                    # Continuar con el siguiente mensaje si este falla
-                    continue
-            
-            logger.info(f"🧹 {deleted_count} mensajes eliminados del chat")
-            
-            if deleted_count == 0:
-                raise Exception("No se pudieron eliminar mensajes")
-            
-        except Exception as e:
-            logger.error(f"Error limpiando chat: {e}")
-            raise
 
     def cleanup(self):
         """Limpiar recursos del bot de forma simple"""

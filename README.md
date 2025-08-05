@@ -1,103 +1,285 @@
 # 🐕 Monitor de Emociones Caninas con IA
 
-Sistema inteligente para detectar y monitorear el estado emocional de perros usando visión por computadora, análisis en tiempo real y control completo vía Telegram.
+Sistema inteligente para detectar y monitorear el estado emocional de perros usando visión por computadora, análisis en tiempo real y control completo vía Telegram con **sistema multiusuario por PC**.
 
 ## ✨ Características Principales
 
-- 🎯 **Detección de emociones en tiempo real** usando YOLOv8 y análisis facial avanzado
-- � **Análisis de videos** con estadísticas completas y reportes detallados
-- 🖥️ **Ventana visual en tiempo real** con detecciones superpuestas y controles
-- 🤖 **Bot de Telegram completo** con navegación intuitiva y control remoto
-- 👥 **Sistema multiusuario** - cada usuario maneja su sesión independiente
-- 🎮 **Control dual** - manejo desde PC (teclado) y Telegram simultáneamente
-- 📊 **Estadísticas detalladas** de comportamiento emocional
-- 🔔 **Alertas automáticas** cuando se detectan emociones preocupantes
-- 🏠 **Navegación mejorada** con botones "Regresar al Menú" en todas las funciones
+### 🎯 **Detección Inteligente**
+- **YOLOv8** para detección precisa de perros
+- **Red neuronal personalizada** (83% precisión) para análisis emocional
+- **Análisis en tiempo real** con ventana visual interactiva
+- **Procesamiento de videos** con estadísticas completas
 
-## 🚀 Nuevas Funcionalidades (Actualización Reciente)
+### 🤖 **Bot de Telegram Avanzado**
+- **Sistema multiusuario por PC** - cada PC tiene su código único
+- **Control remoto completo** - análisis, pausa, captura de frames
+- **Navegación intuitiva** con menús contextuales
+- **Desconexión segura** - control total de sesiones
 
-### 📱 **Bot de Telegram Mejorado**
-- ✅ **Navegación intuitiva** con botones contextuales
-- ✅ **Análisis de videos** subiendo archivos directamente
-- ✅ **Control de análisis en tiempo real** desde el chat
-- ✅ **Estadísticas completas** con emociones detectadas, confianza promedio y más
-- ✅ **Sistema multiusuario** robusto
+### 🖥️ **Sistema Multiusuario por PC**
+- ✅ **Código único por PC** - cada computadora genera su código específico
+- ✅ **Seguridad por autorización** - solo usuarios con código pueden acceder
+- ✅ **Desconexión controlada** - usuarios pueden desconectarse cuando deseen
+- ✅ **Escalabilidad total** - sin límite de PCs o usuarios
 
-### 🎥 **Análisis en Tiempo Real Avanzado**
-- ✅ **Ventana visual** que se abre en tu PC mostrando la cámara
-- ✅ **Detecciones en vivo** con bounding boxes y emociones superpuestas
-- ✅ **Controles por teclado** (Q=pausar, ESC=detener)
-- ✅ **Control remoto desde Telegram** (pausa/reanudación/detener)
-- ✅ **Colores por emoción** (Verde=feliz, Amarillo=relajado, Rojo=triste/enojado)
+### 🎥 **Análisis Dual**
+- **Tiempo Real**: Ventana en vivo con detecciones superpuestas
+- **Videos**: Subida directa desde Telegram con reporte completo
+- **Advertencias inteligentes** - notifica antes de cambiar modos
+- **Control híbrido** - teclado + Telegram simultáneamente
 
-### � **Análisis de Videos**
-- ✅ **Subida directa desde Telegram** (MP4, AVI, MOV)
-- ✅ **Procesamiento completo** con estadísticas detalladas
-- ✅ **Video de salida** con detecciones marcadas
-- ✅ **Resumen estadístico** (total emociones, distribución, confianza promedio)
+## 🔐 Sistema Multiusuario - Cómo Funciona
 
-## 🚀 Instalación y Configuración (Primera Vez)
+### **1. Instalación en Nueva PC**
+```bash
+# Clonar o descargar proyecto
+git clone [repositorio]
+cd ProyectoIA-EmocionesPerros
 
-### Paso 1: Preparar el entorno
+# Instalar dependencias  
+pip install -r requirements.txt
 
-1. **Extraer el archivo ZIP** en una carpeta de tu elección
-2. **Abrir terminal/cmd** en la carpeta del proyecto
-3. **Crear entorno virtual Python**:
-   ```cmd
-   python -m venv .venv
-   ```
-4. **Activar el entorno virtual**:
-   ```cmd
-   .venv\Scripts\activate
-   ```
-5. **Instalar dependencias**:
-   ```cmd
-   pip install -r requirements.txt
-   ```
-
-### Paso 2: Configurar el Bot de Telegram
-
-#### 2.1 Conectar con el Bot Preconfigurado
-1. **Abre Telegram** y busca el bot: **@Emocionesperrunasbot**
-   
-   O usa este enlace directo: **[t.me/Emocionesperrunasbot](https://t.me/Emocionesperrunasbot)**
-
-2. **Envía `/start`** para inicializar el bot
-
-3. **Copia tu Chat ID** que aparece en el mensaje de bienvenida
-
-#### 2.2 Obtener tu Chat ID (Método alternativo)
-Si necesitas obtener tu Chat ID manualmente:
-
-1. **Ejecuta el script incluido**:
-   ```cmd
-   python get_chat_id.py
-   ```
-2. **Presiona Enter** para usar el bot preconfigurado
-3. **Envía cualquier mensaje** al bot @Emocionesperrunasbot
-4. **Copia el Chat ID** que se muestra en la terminal
-
-#### 2.3 Configurar tu Chat ID
-1. **Edita el archivo `main.py`**
-2. **Busca esta línea** (cerca del final del archivo):
-   ```python
-   TELEGRAM_CHAT_ID = "TU_CHAT_ID_AQUI"
-   ```
-3. **Reemplaza** con tu Chat ID real:
-   ```python
-   TELEGRAM_CHAT_ID = "123456789"  # Tu Chat ID obtenido del bot
-   ```
-
-   **⚠️ IMPORTANTE**: NO cambies el `TELEGRAM_TOKEN`, ya está configurado para el bot oficial.
-
-### Paso 3: Verificar la instalación
-
-**Ejecuta el test de conexión**:
-```cmd
-python test_image_quick.py
+# Ejecutar por primera vez
+python main.py
 ```
 
-Si todo está bien configurado, deberías recibir:
+### **2. Código Único Automático**
+Al ejecutar `python main.py`, el sistema:
+- 🖥️ **Detecta automáticamente** el nombre de la PC
+- 🔑 **Genera código único** formato: `PCNA-1234-ABCD`
+- 🎨 **Muestra código colorido** en consola para fácil identificación
+- 📱 **Envía mensaje de bienvenida** explicando proceso de conexión
+
+### **3. Conexión desde Telegram**
+```
+1. Usuario abre Telegram
+2. Busca el bot @Emocionesperrunasbot  
+3. Envía /start
+4. Copia código de la PC e ingresa
+5. ¡Acceso autorizado!
+```
+
+### **4. Ejemplos de Códigos por PC**
+- PC "LAPTOP-CASA" → Código: `LAPT-5678-WXYZ`
+- PC "OFICINA-01" → Código: `OFIC-9012-QRST`  
+- PC "GAMING-PC" → Código: `GAMI-3456-MNOP`
+
+## 🚀 Instalación Rápida
+
+### **Método 1: Archivo Ejecutable (Recomendado)**
+
+1. **Descarga** el proyecto como ZIP
+2. **Extrae** en tu carpeta deseada
+3. **Doble clic** en `ejecutar.bat`
+4. **Copia el código colorido** que aparece en pantalla
+5. **Abre Telegram** → busca `@Emocionesperrunasbot`
+6. **Envía** `/start` y luego tu código
+7. **¡Listo!** Ya puedes usar todas las funciones
+
+### **Método 2: Instalación Manual**
+
+```cmd
+# 1. Crear entorno virtual
+python -m venv .venv
+
+# 2. Activar entorno
+.venv\Scripts\activate
+
+# 3. Instalar dependencias
+pip install -r requirements.txt
+
+# 4. Ejecutar aplicación
+python main.py
+```
+
+## 🎛️ Funciones del Bot de Telegram
+
+### **📋 Menú Principal**
+- **📹 Análisis en Tiempo Real** - Inicia cámara con ventana visual
+- **🎬 Analizar Video** - Sube videos para análisis completo  
+- **📊 Estado Actual** - Información del sistema en tiempo real
+- **📈 Resumen del Día** - Estadísticas acumuladas
+- **🔔 Activar/Pausar Monitoreo** - Alertas automáticas
+- **💡 Consejos Generales** - Recomendaciones por emoción
+- **🚪 Desconectar de PC** - Cerrar sesión segura
+- **❓ Ayuda** - Guía completa de uso
+
+### **🎥 Análisis en Tiempo Real**
+- **▶️ Iniciar** - Abre ventana visual en PC
+- **⏸️ Pausar/Reanudar** - Control remoto del análisis  
+- **⏹️ Detener** - Finaliza análisis con resumen
+- **📸 Capturar Frame** - Foto instantánea con análisis
+- **🎬 Cambiar a Video** - Advertencia antes de cambiar modo
+
+### **🎬 Análisis de Videos**
+- **Formatos soportados**: MP4, AVI, MOV
+- **Tamaño máximo**: 20MB
+- **Duración máxima**: 2 minutos  
+- **Procesamiento automático** con video de salida
+- **Reporte completo** con estadísticas y recomendaciones
+
+## 🔒 Seguridad y Privacidad
+
+### **🔐 Sistema de Autorización**
+- **Código por PC**: Cada computadora tiene código único
+- **Autorización obligatoria**: `/start` + código requerido
+- **Desconexión segura**: Botón para cerrar sesión
+- **Sin límites**: Múltiples usuarios por PC, múltiples PCs
+
+### **🚪 Control de Sesión**
+```
+Usuario → "Desconectar de PC"
+Bot → "⚠️ Te desconectarás de [PC-NAME]. ¿Confirmar?"
+Usuario → "Sí, desconectar"  
+Bot → "✅ Desconectado. Usa /start + código para reconectar"
+```
+
+### **⚠️ Advertencias Inteligentes**
+```
+Usuario → "Analizar Video" (con tiempo real activo)
+Bot → "⚠️ Análisis en tiempo real activo. ¿Pausar y continuar?"
+Usuario → "Sí, pausar y analizar video"
+Bot → "⏸️ Pausado. Ahora envía tu video"
+```
+
+## 🎯 Casos de Uso
+
+### **🏠 Uso Doméstico**
+- PC principal con código compartido entre familia
+- Laptop personal con código privado para uso individual
+- Monitoreo remoto de mascotas durante el día
+
+### **🏢 Uso Profesional**
+- **Veterinarias**: PC de recepción + PC del veterinario
+- **Centros de entrenamiento**: Múltiples estaciones independientes
+- **Refugios**: Monitoreo de múltiples áreas simultáneamente
+
+### **🎓 Uso Educativo/Investigación**
+- Laboratorios con múltiples PCs de análisis
+- Proyectos de investigación con datos independientes
+- Demostraciones en clase con control granular
+
+## 📊 Análisis y Reportes
+
+### **📈 Estadísticas en Tiempo Real**
+- **Emociones detectadas**: Happy, Sad, Angry, Relaxed
+- **Confianza promedio**: Precisión de las detecciones
+- **Tiempo de análisis**: Duración total del monitoreo
+- **Frames procesados**: Cantidad de imágenes analizadas
+
+### **📋 Reportes de Video**
+```
+🎬 ANÁLISIS DE VIDEO COMPLETADO
+
+📁 Video: ejemplo.mp4
+🔍 Detecciones totales: 156
+🎯 Emoción dominante: HAPPY (65.4%)
+
+📊 Distribución:
+😊 HAPPY: 102 (65.4%)
+😌 RELAXED: 32 (20.5%)  
+😢 SAD: 15 (9.6%)
+😠 ANGRY: 7 (4.5%)
+
+⚡ Confianza promedio: 87.3%
+⏱️ Duración: 45 segundos
+```
+
+### **💡 Recomendaciones Automáticas**
+- **😊 Happy**: Continúa con actividades que lo hacen feliz
+- **😌 Relaxed**: Estado ideal, mantén el ambiente tranquilo  
+- **😢 Sad**: Dedícale tiempo y verifica si está enfermo
+- **😠 Angry**: Revisa ruidos fuertes, dale espacio tranquilo
+
+## 🛠️ Estructura del Proyecto
+
+```
+ProyectoIA-EmocionesPerros/
+├── 📁 utils/                    # Módulos principales
+│   ├── telegram_utils.py        # Bot de Telegram completo
+│   ├── cam_utils.py            # Análisis de emociones
+│   └── yolo_dog_detector.py    # Detección de perros
+├── 📁 modelo/                   # Red neuronal entrenada
+│   └── mejor_modelo_83.h5      # Modelo 83% precisión
+├── 📁 media/                   # Videos de prueba
+├── main.py                     # Aplicación principal
+├── procesar_video.py          # Procesador de videos
+├── ejecutar.bat               # Ejecutable principal
+├── ejecutar_video.bat         # Ejecutable para videos
+└── requirements.txt           # Dependencias
+```
+
+## 🚨 Solución de Problemas
+
+### **❌ "Error inicializando Telegram"**
+**Solución**: Revisa conexión a internet y reinicia la aplicación
+
+### **❌ "Cámara no encontrada"**  
+**Solución**: 
+- Verifica que la cámara esté conectada
+- Cierra otras aplicaciones que usen la cámara
+- Reinicia la aplicación
+
+### **❌ "Código incorrecto"**
+**Solución**:
+- Verifica que copiaste el código completo sin espacios
+- Asegúrate de usar el código de la PC correcta
+- Si reiniciaste la app, se genera un código nuevo
+
+### **🔄 Reiniciar Sistema**
+Si hay problemas, simplemente:
+1. Cierra la aplicación (Ctrl+C o cerrar ventana)
+2. Ejecuta nuevamente `ejecutar.bat` o `python main.py`
+3. Se generará un nuevo código de conexión
+
+## 💡 Consejos de Uso
+
+### **🎯 Para Mejores Resultados**
+- **Iluminación adecuada**: Evita contraluces y sombras fuertes
+- **Perro visible**: Asegúrate de que la cara del perro sea visible  
+- **Distancia óptima**: 1-3 metros de la cámara
+- **Estabilidad**: Mantén la cámara fija durante análisis
+
+### **📱 Uso del Bot**
+- **Mensajes claros**: El bot responde a botones, no a texto libre
+- **Una función a la vez**: Termina un análisis antes de iniciar otro
+- **Desconexión segura**: Usa el botón "Desconectar" antes de cerrar
+- **Códigos únicos**: Cada PC necesita su propio código
+
+## 🎉 Características Avanzadas
+
+### **🔄 Análisis Híbrido**
+- Control simultáneo desde PC (teclado) y Telegram
+- Cambio fluido entre modos de análisis
+- Advertencias antes de cambiar estados
+
+### **📸 Captura Remota**
+- Toma fotos instantáneas desde Telegram
+- Análisis inmediato de la foto capturada
+- Envío automático del resultado
+
+### **🎨 Interfaz Visual Rica**
+- Ventana en tiempo real con colores por emoción
+- Códigos de conexión con formato colorido y llamativo
+- Mensajes de Telegram con emojis y formato Markdown
+
+### **🔐 Seguridad Robusta**
+- Sistema de autorización por PC
+- Desconexión controlada por usuario
+- Códigos únicos regenerables
+
+---
+
+## 📞 Información del Proyecto
+
+**Desarrollado para**: Análisis de bienestar animal usando IA  
+**Tecnologías**: Python, OpenCV, TensorFlow, YOLOv8, Telegram Bot API  
+**Precisión del modelo**: 83% en detección de emociones caninas  
+**Compatibilidad**: Windows 10/11, Python 3.8+
+
+---
+
+¡Tu compañero inteligente para el cuidado y bienestar de tu mascota! 🐕❤️
 - ✅ Un mensaje de prueba en tu bot de Telegram
 - ✅ Logs exitosos en la terminal
 
@@ -186,22 +368,6 @@ El sistema envía notificaciones inteligentes cuando detecta:
 - 📊 **Patrones de comportamiento** preocupantes
 - 🎯 **Análisis detallado** con nivel de confianza y recomendaciones
 - 📸 **Capturas automáticas** del momento de la detección
-
-## 📁 Estructura del Proyecto
-
-```
-ProyectoIACam/
-├── main.py                 # Sistema principal de detección
-├── ejecutar.bat           # Ejecutable simple para Windows
-├── get_chat_id.py         # Script para obtener Chat ID de Telegram
-├── requirements.txt       # Dependencias Python
-├── README.md             # Esta guía
-├── modelo/
-│   └── mejor_modelo_83.h5 # Modelo de IA entrenado
-└── utils/
-    ├── cam_utils.py      # Utilidades de cámara y YOLO
-    └── telegram_utils.py # Bot de Telegram y notificaciones
-```
 
 ## 🤖 Bot de Telegram Preconfigurado
 
