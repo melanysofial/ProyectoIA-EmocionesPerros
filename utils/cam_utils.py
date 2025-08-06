@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
-
+#Ingreso de imagen detectado y halla valor maximo de probabilidad por frame
 class EmotionDetector:
     def __init__(self, model_path):
         self.model = load_model(model_path)
